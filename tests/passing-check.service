@@ -8,6 +8,7 @@
 [Unit]
 Description=Greenboot Passing Check Example
 Before=greenboot.service
+RequiredBy=greenboot.target
 
 [Service]
 Type=oneshot

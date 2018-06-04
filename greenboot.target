@@ -5,6 +5,6 @@
 #  the Free Software Foundation; either version 2.1 of the License, or
 #  (at your option) any later version.
 
-[Service]
-Type=oneshot
-ExecStart=/bin/bash -c 'exec /bin/echo "Greenboot Health Check: FAILURE" | /bin/systemd-cat -p emerg'
+[Unit]
+Description=Greenboot Generic Health Check Framework
+WantedBy=multi-user.target

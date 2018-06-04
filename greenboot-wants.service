@@ -6,9 +6,10 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=Greenboot Generic Health Check Framework
-After=greenboot.target
+Description=Greenboot Wanted Scripts Check
+Before=greenboot.service
+WantedBy=greenboot.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh
+ExecStart=/bin/run-parts --list /etc/greenboot/wants | /bin/systemd-cat -p notice
