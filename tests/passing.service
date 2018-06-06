@@ -1,15 +1,17 @@
-#  This file is part of Greenboot.
+#  This file is part of greenboot.
 #
-#  Greenboot is free software; you can redistribute it and/or modify it
+#  greenboot is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU Lesser General Public License as published by
 #  the Free Software Foundation; either version 2.1 of the License, or
 #  (at your option) any later version.
 
 [Unit]
-Description=Greenboot Failing Check Example
+Description=greenboot Passing Check Example
 Before=greenboot.service
-RequiredBy=greenboot.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/false
+ExecStart=/bin/true
+
+[Install]
+RequiredBy=greenboot.target

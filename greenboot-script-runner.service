@@ -6,9 +6,12 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Generic Health Check Framework
-After=greenboot.target
+Description=greenboot Required Scripts Check
+Before=greenboot.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh
+ExecStart=/usr/libexec/greenboot/greenboot-script-runner.sh
+
+[Install]
+RequiredBy=greenboot.target

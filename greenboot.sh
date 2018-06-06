@@ -1,9 +1,10 @@
 #!/bin/bash
+set -euo pipefail
+
 if [ "$(systemctl is-active greenboot.target)" = "active" ]; then
-   echo "Greenboot Health Check: SUCCESS" | systemd-cat -p notice
+   echo "Health Check: SUCCESS"
 else
-   echo "Greenboot Health Check: FAILURE! Rolling back..." | systemd-cat -p emerg
-   # TODO: verify rpm-ostree status has more than one entry
-   rpm-ostree rollback
-   reboot
+   echo "Health Check: FAILURE! Starting rollback..." >&2
+   # TODO: verify rpm-ostree status has an older entry to boot back into
+   rpm-ostree rollback --reboot
 fi
