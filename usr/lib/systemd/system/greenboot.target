@@ -6,12 +6,7 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Required Scripts Check
-Before=greenboot.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot-script-runner.sh
-
-[Install]
-RequiredBy=greenboot.target
+Description=greenboot Success Target
+Requires=healthcheck.target
+After=healthcheck.target
+Conflicts=redboot.target

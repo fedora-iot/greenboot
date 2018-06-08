@@ -6,7 +6,12 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Generic Health Check Framework
+Description=greenboot Failure Scripts Runner
+Before=redboot.target
 
 [Install]
-WantedBy=multi-user.target
+RequiredBy=redboot.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/greenboot/greenboot.sh red

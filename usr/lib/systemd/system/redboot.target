@@ -6,9 +6,7 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Generic Health Check Framework
-After=greenboot.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh
+Description=greenboot Failure Target
+Requires=bootcheck.target
+After=bootcheck.target
+Conflicts=redboot.target
