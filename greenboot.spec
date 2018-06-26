@@ -4,7 +4,7 @@
 %global build_timestamp %(date +"%Y%m%d%H%M%%S")
 
 Name:               greenboot
-Version:            0.1
+Version:            0.2
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -19,11 +19,12 @@ Requires:           systemd
 %description
 %{summary}.
 
-%package notifications
-Summary:            Notification scripts for greenboot
+%package motd
+Summary:            MotD updater for greenboot
+Requires:           pam >= 1.3.1
 
-%description notifications
-Notification scripts for greenboot
+%description motd
+Message of the Day updater for greenboot
 
 %package ostree
 Summary:            OSTree specific scripts for greenboot
@@ -49,15 +50,18 @@ install -Dpm 0644 usr/lib/systemd/system/greenboot-healthcheck.service %{buildro
 install -Dpm 0644 usr/lib/systemd/system/greenboot.service %{buildroot}%{_unitdir}/greenboot.service
 install -Dpm 0644 usr/lib/systemd/system/redboot.service %{buildroot}%{_unitdir}/redboot.service
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}.d/check/required
-install -Dpm 0755 etc/greenboot.d/check/required/00_required_scripts_start.sh %{buildroot}%{_sysconfdir}/%{name}.d/check/required/00_required_scripts_start.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/check/wanted
-install -Dpm 0755 etc/greenboot.d/check/wanted/00_wanted_scripts_start.sh %{buildroot}%{_sysconfdir}/%{name}.d/check/wanted/00_wanted_scripts_start.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/green
-install -Dpm 0755 etc/greenboot.d/green/00_greenboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}.d/green/00_greenboot_notification.sh
+install -Dpm 0755 etc/greenboot.d/green/00_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}.d/green/00_greenboot_motd.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/red
-install -Dpm 0755 etc/greenboot.d/red/00_redboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/00_redboot_notification.sh
+install -Dpm 0755 etc/greenboot.d/red/00_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/00_redboot_motd.sh
 install -Dpm 0755 etc/greenboot.d/red/98_ostree_rollback.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/98_ostree_rollback.sh
 install -Dpm 0755 etc/greenboot.d/red/99_reboot.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/99_reboot.sh
+install -Dpm 0644 etc/greenboot.d/motd/greenboot.motd %{buildroot}%{_sysconfdir}/%{name}.d/motd/greenboot.motd
+install -Dpm 0644 etc/greenboot.d/motd/redboot.motd %{buildroot}%{_sysconfdir}/%{name}.d/motd/redboot.motd
+mkdir -p %{buildroot}/run/greenboot
+mkdir -p %{buildroot}%{_sysconfdir}/motd.d
+ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
 
 %post
 %systemd_post greenboot.target
@@ -94,11 +98,13 @@ install -Dpm 0755 etc/greenboot.d/red/99_reboot.sh %{buildroot}%{_sysconfdir}/%{
 %dir %{_sysconfdir}/%{name}.d/green
 %dir %{_sysconfdir}/%{name}.d/red
 
-%files notifications
-%{_sysconfdir}/%{name}.d/check/required/00_required_scripts_start.sh
-%{_sysconfdir}/%{name}.d/check/wanted/00_wanted_scripts_start.sh
-%{_sysconfdir}/%{name}.d/green/00_greenboot_notification.sh
-%{_sysconfdir}/%{name}.d/red/00_redboot_notification.sh
+%files motd
+%{_sysconfdir}/%{name}.d/motd/greenboot.motd
+%{_sysconfdir}/%{name}.d/motd/redboot.motd
+%{_sysconfdir}/%{name}.d/green/00_greenboot_motd.sh
+%{_sysconfdir}/%{name}.d/red/00_redboot_motd.sh
+%dir /run/greenboot
+%config %{_sysconfdir}/motd.d/greenboot
 
 %files ostree
 %{_sysconfdir}/%{name}.d/red/98_ostree_rollback.sh

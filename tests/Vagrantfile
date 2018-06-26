@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     curl https://copr.fedorainfracloud.org/coprs/lorbus/greenboot/repo/fedora-28/lorbus-greenboot-fedora-28.repo --output /etc/yum.repos.d/_copr_lorbus-greenboot.repo
-    rpm-ostree install greenboot greenboot-notifications
+    rpm-ostree install greenboot greenboot-motd
     rpm-ostree ex livefs
     # mv /vagrant/10_failing_check.sh /etc/greenboot.d/check/required/10_failing_check.sh
     systemctl enable greenboot.target
