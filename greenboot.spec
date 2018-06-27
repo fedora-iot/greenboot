@@ -49,16 +49,16 @@ install -Dpm 0644 usr/lib/systemd/system/greenboot.target %{buildroot}%{_unitdir
 install -Dpm 0644 usr/lib/systemd/system/greenboot-healthcheck.service %{buildroot}%{_unitdir}/greenboot-healthcheck.service
 install -Dpm 0644 usr/lib/systemd/system/greenboot.service %{buildroot}%{_unitdir}/greenboot.service
 install -Dpm 0644 usr/lib/systemd/system/redboot.service %{buildroot}%{_unitdir}/redboot.service
-mkdir -p %{buildroot}%{_sysconfdir}/%{name}.d/check/required
-mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/check/wanted
-mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/green
-install -Dpm 0755 etc/greenboot.d/green/00_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}.d/green/00_greenboot_motd.sh
-mkdir    %{buildroot}%{_sysconfdir}/%{name}.d/red
-install -Dpm 0755 etc/greenboot.d/red/00_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/00_redboot_motd.sh
-install -Dpm 0755 etc/greenboot.d/red/98_ostree_rollback.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/98_ostree_rollback.sh
-install -Dpm 0755 etc/greenboot.d/red/99_reboot.sh %{buildroot}%{_sysconfdir}/%{name}.d/red/99_reboot.sh
-install -Dpm 0644 etc/greenboot.d/motd/greenboot.motd %{buildroot}%{_sysconfdir}/%{name}.d/motd/greenboot.motd
-install -Dpm 0644 etc/greenboot.d/motd/redboot.motd %{buildroot}%{_sysconfdir}/%{name}.d/motd/redboot.motd
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
+install -Dpm 0755 etc/greenboot/green.d/00_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/00_greenboot_motd.sh
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
+install -Dpm 0755 etc/greenboot/red.d/00_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/00_redboot_motd.sh
+install -Dpm 0755 etc/greenboot/red.d/98_ostree_rollback.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/98_ostree_rollback.sh
+install -Dpm 0755 etc/greenboot/red.d/99_reboot.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/99_reboot.sh
+install -Dpm 0644 etc/greenboot/motd/greenboot.motd %{buildroot}%{_sysconfdir}/%{name}/motd/greenboot.motd
+install -Dpm 0644 etc/greenboot/motd/redboot.motd %{buildroot}%{_sysconfdir}/%{name}/motd/redboot.motd
 mkdir -p %{buildroot}/run/greenboot
 mkdir -p %{buildroot}%{_sysconfdir}/motd.d
 ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
@@ -93,24 +93,24 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
 %{_unitdir}/greenboot-healthcheck.service
 %{_unitdir}/greenboot.service
 %{_unitdir}/redboot.service
-%dir %{_sysconfdir}/%{name}.d/check/required
-%dir %{_sysconfdir}/%{name}.d/check/wanted
-%dir %{_sysconfdir}/%{name}.d/green
-%dir %{_sysconfdir}/%{name}.d/red
+%dir %{_sysconfdir}/%{name}/check/required.d
+%dir %{_sysconfdir}/%{name}/check/wanted.d
+%dir %{_sysconfdir}/%{name}/green.d
+%dir %{_sysconfdir}/%{name}/red.d
 
 %files motd
-%{_sysconfdir}/%{name}.d/motd/greenboot.motd
-%{_sysconfdir}/%{name}.d/motd/redboot.motd
-%{_sysconfdir}/%{name}.d/green/00_greenboot_motd.sh
-%{_sysconfdir}/%{name}.d/red/00_redboot_motd.sh
+%{_sysconfdir}/%{name}/motd/greenboot.motd
+%{_sysconfdir}/%{name}/motd/redboot.motd
+%{_sysconfdir}/%{name}/green.d/00_greenboot_motd.sh
+%{_sysconfdir}/%{name}/red.d/00_redboot_motd.sh
 %dir /run/greenboot
 %config %{_sysconfdir}/motd.d/greenboot
 
 %files ostree
-%{_sysconfdir}/%{name}.d/red/98_ostree_rollback.sh
+%{_sysconfdir}/%{name}/red.d/98_ostree_rollback.sh
 
 %files reboot
-%{_sysconfdir}/%{name}.d/red/99_reboot.sh
+%{_sysconfdir}/%{name}/red.d/99_reboot.sh
 
 %changelog
 * Thu Jun 14 2018 Christian Glombek <lorbus@fedoraproject.org> - 0.1-1
