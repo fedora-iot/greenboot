@@ -1,0 +1,2 @@
+Health Check FAILED! Boot Status is RED!
+Run `journalctl -u greenboot-healthcheck` for more information.

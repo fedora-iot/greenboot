@@ -10,15 +10,19 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     curl https://copr.fedorainfracloud.org/coprs/lorbus/greenboot/repo/fedora-28/lorbus-greenboot-fedora-28.repo --output /etc/yum.repos.d/_copr_lorbus-greenboot.repo
-    rpm-ostree install greenboot greenboot-notifications
+    rpm-ostree install greenboot greenboot-motd
     rpm-ostree ex livefs
-    # mv /vagrant/10_failing_check.sh /etc/greenboot.d/check/required/10_failing_check.sh
+    # Uncomment the following line to test red boot status behaviour
+    # mv /home/vagrant/sync/10_failing_check.sh /etc/greenboot/check/required.d/10_failing_check.sh
+    # Add pam_motd to sshd pam config until openssh is rebuilt
+    # see https://src.fedoraproject.org/rpms/openssh/c/4ef6823ff4d342f144dfca9eaaa4ffe5b46a1258
+    sed -i '/session    optional     pam_keyinit.so force revoke/a session    optional     pam_motd.so' /etc/pam.d/sshd
     systemctl enable greenboot.target
     systemctl start greenboot.target
     sleep 5
     journalctl -u greenboot.target
     journalctl -u greenboot
-    journalctl -t greenboot.sh
+    journalctl -u greenboot-healthcheck
   SHELL
 
 end
