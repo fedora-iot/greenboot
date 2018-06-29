@@ -50,11 +50,15 @@ install -Dpm 0644 usr/lib/systemd/system/greenboot-healthcheck.service %{buildro
 install -Dpm 0644 usr/lib/systemd/system/greenboot.service %{buildroot}%{_unitdir}/greenboot.service
 install -Dpm 0644 usr/lib/systemd/system/redboot.service %{buildroot}%{_unitdir}/redboot.service
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
+install -Dpm 0755 etc/greenboot/check/required.d/00_required_scripts_start.sh %{buildroot}%{_sysconfdir}/%{name}/check/required.d/00_required_scripts_start.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
+install -Dpm 0755 etc/greenboot/check/wanted.d/00_wanted_scripts_start.sh %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
-install -Dpm 0755 etc/greenboot/green.d/00_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/00_greenboot_motd.sh
+install -Dpm 0755 etc/greenboot/green.d/00_greenboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/00_greenboot_notification.sh
+install -Dpm 0755 etc/greenboot/green.d/01_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/01_greenboot_motd.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
-install -Dpm 0755 etc/greenboot/red.d/00_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/00_redboot_motd.sh
+install -Dpm 0755 etc/greenboot/red.d/00_redboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/00_redboot_notification.sh
+install -Dpm 0755 etc/greenboot/red.d/01_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/01_redboot_motd.sh
 install -Dpm 0755 etc/greenboot/red.d/98_ostree_rollback.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/98_ostree_rollback.sh
 install -Dpm 0755 etc/greenboot/red.d/99_reboot.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/99_reboot.sh
 install -Dpm 0644 etc/greenboot/motd/greenboot.motd %{buildroot}%{_sysconfdir}/%{name}/motd/greenboot.motd
@@ -94,15 +98,19 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
 %{_unitdir}/greenboot.service
 %{_unitdir}/redboot.service
 %dir %{_sysconfdir}/%{name}/check/required.d
+%{_sysconfdir}/%{name}/check/required.d/00_required_scripts_start.sh
 %dir %{_sysconfdir}/%{name}/check/wanted.d
+%{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 %dir %{_sysconfdir}/%{name}/green.d
+%{_sysconfdir}/%{name}/green.d/00_greenboot_notification.sh
 %dir %{_sysconfdir}/%{name}/red.d
+%{_sysconfdir}/%{name}/red.d/00_redboot_notification.sh
 
 %files motd
 %{_sysconfdir}/%{name}/motd/greenboot.motd
 %{_sysconfdir}/%{name}/motd/redboot.motd
-%{_sysconfdir}/%{name}/green.d/00_greenboot_motd.sh
-%{_sysconfdir}/%{name}/red.d/00_redboot_motd.sh
+%{_sysconfdir}/%{name}/green.d/01_greenboot_motd.sh
+%{_sysconfdir}/%{name}/red.d/01_redboot_motd.sh
 %dir /run/greenboot
 %config %{_sysconfdir}/motd.d/greenboot
 

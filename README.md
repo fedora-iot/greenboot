@@ -6,12 +6,12 @@ The following directory structure is created:
 
 ```
 /etc
-    /greenboot
-              /check
-                    /required.d
-                    /wanted.d
-              /green.d
-              /red.d
+└── greenboot
+    ├── check
+    │   ├── required.d
+    │   └── wanted.d
+    ├── green.d
+    └── red.d
 ```
 
 ### Custom Health Checks
