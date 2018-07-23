@@ -2,75 +2,42 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-run_required_scripts () {
-  echo "Running Required Health Check Scripts..."
-  local required_scripts=`find /etc/greenboot/check/required.d -name '*.sh'`
-  local rc=0
-  for script in $required_scripts; do
+script_runner () {
+  local scripts_dir=$1; shift
+  local mode=$1; shift
+  local start_msg=$1; shift
+  echo "$start_msg"
+  for script in `find $scripts_dir -name '*.sh'`; do
+    local rc=0
     systemd-cat -t "$(basename $script)" bash $script || rc=$?
     if [ $rc -ne 0 ]; then
-      echo "Required Health Check Script '$(basename $script)' FAILURE (exit code '$rc')" >&2
-      exit $rc
-    fi
-    echo "Required Health Check Script '$(basename $script)' SUCCESS"
-  done
-}
-
-run_wanted_scripts () {
-  echo "Running Wanted Health Check Scripts..."
-  local wanted_scripts=`find /etc/greenboot/check/wanted.d -name '*.sh'`
-  local rc=0
-  for script in $wanted_scripts; do
-    systemd-cat -t "$(basename $script)" bash $script || rc=$?
-    if [ $rc -eq 0 ]; then
-      echo "Wanted Health Check Script '$(basename $script)' SUCCESS"
+      local failure_msg="Script '$(basename $script)' FAILURE (exit code '$rc')"
+      case "$mode" in
+        "relaxed")
+          echo "$failure_msg. Continuing..." >&2
+          ;;
+        "strict")
+          echo "$failure_msg" >&2
+          exit $rc
+      esac
     else
-      echo "Wanted Health Check Script '$(basename $script)' FAILURE (exit code '$rc'). Continuing..." >&2
+      echo "Script '$(basename $script)' SUCCESS"
     fi
   done
 }
 
-run_green_scripts () {
-  echo "Running Green Scripts..."
-  local green_scripts=`find /etc/greenboot/green.d -name '*.sh'`
-  local rc=0
-  for script in $green_scripts; do
-    systemd-cat -t "$(basename $script)" bash $script || rc=$?
-    if [ $rc -eq 0 ]; then
-      echo "Green Script '$(basename $script)' SUCCESS"
-    else
-      echo "Green Script '$(basename $script)' FAILURE (exit code '$rc'). Continuing..." >&2
-    fi
-  done
-}
-
-run_red_scripts () {
-  echo "Running Red Scripts..."
-  local red_scripts=`find /etc/greenboot/red.d -name '*.sh'`
-  local rc=0
-  for script in $red_scripts; do
-    systemd-cat -t "$(basename $script)" bash $script || rc=$?
-    if [ $rc -eq 0 ]; then
-      echo "Red Script '$(basename $script)' SUCCESS"
-    else
-      echo "Red Script '$(basename $script)' FAILURE (exit code '$rc'). Continuing..." >&2
-    fi
-  done
-}
-
-case "$@" in
+case "$1" in
   "check")
-    run_required_scripts || exit 1
-    run_wanted_scripts
+    script_runner "/etc/greenboot/check/required.d" "strict" "Running Required Health Check Scripts..." || exit 1
+    script_runner "/etc/greenboot/check/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     ;;
   "green")
-    run_green_scripts
+    script_runner "/etc/greenboot/green.d" "relaxed" "Running Green Scripts..."
     ;;
   "red")
-    run_red_scripts
+    script_runner "/etc/greenboot/red.d" "relaxed" "Running Red Scripts..."
     ;;
   *)
     echo "Illegal Command" >&2
     exit 127
-    ;;
 esac
