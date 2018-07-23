@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Health Check FAILURE! Boot status is RED"
+echo "<0>Health Check FAILURE! Boot status is RED"
