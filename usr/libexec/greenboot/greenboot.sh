@@ -14,14 +14,14 @@ script_runner () {
       local failure_msg="Script '$(basename $script)' FAILURE (exit code '$rc')"
       case "$mode" in
         "relaxed")
-          echo "$failure_msg. Continuing..." >&2
+          echo "<2>$failure_msg. Continuing..." >&2
           ;;
         "strict")
-          echo "$failure_msg" >&2
+          echo "<0>$failure_msg" >&2
           exit $rc
       esac
     else
-      echo "Script '$(basename $script)' SUCCESS"
+      echo "<5>Script '$(basename $script)' SUCCESS"
     fi
   done
 }

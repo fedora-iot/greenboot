@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Health Check SUCCESS! Boot status is GREEN"
+echo "<5>Health Check SUCCESS! Boot status is GREEN"
