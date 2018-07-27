@@ -54,12 +54,12 @@ install -Dpm 0755 etc/greenboot/check/required.d/00_required_scripts_start.sh %{
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 install -Dpm 0755 etc/greenboot/check/wanted.d/00_wanted_scripts_start.sh %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
+install -Dpm 0755 etc/greenboot/green.d/00_grub_fallback.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/00_grub_fallback.sh
 install -Dpm 0755 etc/greenboot/green.d/00_greenboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/00_greenboot_notification.sh
 install -Dpm 0755 etc/greenboot/green.d/01_greenboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/green.d/01_greenboot_motd.sh
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
 install -Dpm 0755 etc/greenboot/red.d/00_redboot_notification.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/00_redboot_notification.sh
 install -Dpm 0755 etc/greenboot/red.d/01_redboot_motd.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/01_redboot_motd.sh
-install -Dpm 0755 etc/greenboot/red.d/98_ostree_rollback.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/98_ostree_rollback.sh
 install -Dpm 0755 etc/greenboot/red.d/99_reboot.sh %{buildroot}%{_sysconfdir}/%{name}/red.d/99_reboot.sh
 install -Dpm 0644 etc/greenboot/motd/greenboot.motd %{buildroot}%{_sysconfdir}/%{name}/motd/greenboot.motd
 install -Dpm 0644 etc/greenboot/motd/redboot.motd %{buildroot}%{_sysconfdir}/%{name}/motd/redboot.motd
@@ -115,7 +115,7 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
 %config %{_sysconfdir}/motd.d/greenboot
 
 %files ostree
-%{_sysconfdir}/%{name}/red.d/98_ostree_rollback.sh
+%{_sysconfdir}/%{name}/green.d/00_grub_fallback.sh
 
 %files reboot
 %{_sysconfdir}/%{name}/red.d/99_reboot.sh
