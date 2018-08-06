@@ -26,11 +26,21 @@ Requires:           pam >= 1.3.1
 %description motd
 Message of the Day updater for greenboot
 
-%package ostree
-Summary:            OSTree specific scripts for greenboot
+%package ostree-grub2
+Summary:            greenboot scripts for OSTree-based systems using the Grub2 bootloader
+Requires:           greenboot
+Requires:           greenboot-grub2
+Requires:           greenboot-reboot
 
-%description ostree
-OSTree specific scripts for greenboot
+%description ostree-grub2
+%{summary}.
+
+%package grub2
+Summary:            Grub2 specific scripts for greenboot
+Requires:           greenboot
+
+%description grub2
+%{summary}.
 
 %package reboot
 Summary:            Reboot on red status for greenboot
@@ -109,8 +119,11 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/greenboot
 %dir /run/greenboot
 %config %{_sysconfdir}/motd.d/greenboot
 
-%files ostree
-%{_sysconfdir}/%{name}/green.d/00_grub_fallback.sh
+%files ostree-grub2
+%{_sysconfdir}/%{name}/green.d/01_ostree_grub2_fallback.sh
+
+%files grub2
+%{_sysconfdir}/%{name}/green.d/02_grub2_boot_success.sh
 
 %files reboot
 %{_sysconfdir}/%{name}/red.d/99_reboot.sh

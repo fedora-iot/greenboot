@@ -5,4 +5,3 @@ set -euo pipefail
 if grub2-editenv list | grep -q "^boot_counter=-1$"; then
   rpm-ostree rollback
 fi
-grub2-editenv - set boot_success=1
