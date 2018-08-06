@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     curl https://copr.fedorainfracloud.org/coprs/lorbus/greenboot/repo/fedora-28/lorbus-greenboot-fedora-28.repo --output /etc/yum.repos.d/_copr_lorbus-greenboot.repo
-    rpm-ostree install greenboot greenboot-motd
+    rpm-ostree install greenboot greenboot-motd greenboot-ostree-grub2
     rpm-ostree ex livefs
     # Uncomment the following line to test red boot status behaviour
     # mv /home/vagrant/sync/10_failing_check.sh /etc/greenboot/check/required.d/10_failing_check.sh
