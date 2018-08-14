@@ -1,6 +1,5 @@
 %global github_owner    LorbusChris
 %global github_project  greenboot
-%global github_branch   master
 %global build_timestamp %(date +"%Y%m%d%H%M%%S")
 
 Name:               greenboot
@@ -9,7 +8,7 @@ Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 URL:                https://github.com/%{github_owner}/%{github_project}
-Source0:            https://github.com/%{github_owner}/%{github_project}/archive/%{github_branch}.tar.gz
+Source0:            https://github.com/%{github_owner}/%{github_project}/archive/v%{version}.tar.gz
 
 BuildArch:          noarch
 BuildRequires:      systemd
@@ -23,6 +22,7 @@ Requires:           systemd
 Summary:            Message of the Day updater for greenboot
 Requires:           greenboot
 Requires:           pam >= 1.3.1
+Requires:           openssh
 
 %description motd
 %{summary}.
@@ -131,5 +131,5 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %{_sysconfdir}/%{name}/red.d/99_reboot.sh
 
 %changelog
-* Thu Jun 14 2018 Christian Glombek <lorbus@fedoraproject.org> - 0.1-1
-- Version 0.1
+* Thu Jun 14 2018 Christian Glombek <lorbus@fedoraproject.org> - 0.4-1
+- Initial Package
