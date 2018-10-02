@@ -4,7 +4,7 @@
 
 Name:               greenboot
 Version:            0.4
-Release:            1%{?dist}
+Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 URL:                https://github.com/%{github_owner}/%{github_project}
@@ -20,7 +20,7 @@ Requires:           systemd
 
 %package motd
 Summary:            Message of the Day updater for greenboot
-Requires:           greenboot
+Requires:           %{name} = %{version}-%{release}
 Requires:           pam >= 1.3.1
 Requires:           openssh
 
@@ -28,30 +28,30 @@ Requires:           openssh
 %{summary}.
 
 %package ostree-grub2
-Summary:            greenboot scripts for OSTree-based systems using the Grub2 bootloader
-Requires:           greenboot
-Requires:           greenboot-grub2
-Requires:           greenboot-reboot
+Summary:            Scripts for greenboot on OSTree-based systems using the Grub2 bootloader
+Requires:           %{name} = %{version}-%{release}
+Requires:           %{name}-grub2 = %{version}-%{release}
+Requires:           %{name}-reboot = %{version}-%{release}
 
 %description ostree-grub2
 %{summary}.
 
 %package grub2
 Summary:            Grub2 specific scripts for greenboot
-Requires:           greenboot
+Requires:           %{name} = %{version}-%{release}
 
 %description grub2
 %{summary}.
 
 %package reboot
 Summary:            Reboot on red status for greenboot
-Requires:           greenboot
+Requires:           %{name} = %{version}-%{release}
 
 %description reboot
 %{summary}.
 
 %prep
-%setup -n %{github_project}-%{version}
+%setup -qn %{github_project}-%{version}
 
 %build
 
@@ -105,6 +105,8 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %{_unitdir}/greenboot-healthcheck.service
 %{_unitdir}/greenboot.service
 %{_unitdir}/redboot.service
+%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/%{name}/check
 %dir %{_sysconfdir}/%{name}/check/required.d
 %{_sysconfdir}/%{name}/check/required.d/00_required_scripts_start.sh
 %dir %{_sysconfdir}/%{name}/check/wanted.d
@@ -116,8 +118,8 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 
 %files motd
 %dir /run/%{name}
-%config %{_sysconfdir}/motd.d/%{name}
-%{_sysconfdir}/%{name}/motd/
+%config(noreplace) %{_sysconfdir}/motd.d/%{name}
+%config %{_sysconfdir}/%{name}/motd/
 %{_sysconfdir}/%{name}/green.d/50_greenboot_motd.sh
 %{_sysconfdir}/%{name}/red.d/50_redboot_motd.sh
 
@@ -131,5 +133,8 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %{_sysconfdir}/%{name}/red.d/99_reboot.sh
 
 %changelog
+* Tue Oct 02 2018 Christian Glombek <lorbus@fedoraproject.org> - 0.4-2
+- Spec Review
+
 * Thu Jun 14 2018 Christian Glombek <lorbus@fedoraproject.org> - 0.4-1
 - Initial Package
