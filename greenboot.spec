@@ -112,9 +112,7 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %dir %{_sysconfdir}/%{name}/check/wanted.d
 %{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 %dir %{_sysconfdir}/%{name}/green.d
-%{_sysconfdir}/%{name}/green.d/00_greenboot_notification.sh
 %dir %{_sysconfdir}/%{name}/red.d
-%{_sysconfdir}/%{name}/red.d/00_redboot_notification.sh
 
 %files motd
 %dir /run/%{name}
