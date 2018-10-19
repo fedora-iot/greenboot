@@ -21,7 +21,7 @@ script_runner () {
           exit $rc
       esac
     else
-      echo "<5>Script '$(basename $script)' SUCCESS"
+      echo "<6>Script '$(basename $script)' SUCCESS"
     fi
   done
 }
@@ -32,9 +32,11 @@ case "$1" in
     script_runner "/etc/greenboot/check/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     ;;
   "green")
+    echo "<5>Boot Status is GREEN - Health Check SUCCESS!"
     script_runner "/etc/greenboot/green.d" "relaxed" "Running Green Scripts..."
     ;;
   "red")
+    echo "<0>Boot Status is RED - Health Check FAILURE!"
     script_runner "/etc/greenboot/red.d" "relaxed" "Running Red Scripts..."
     ;;
   *)
