@@ -3,8 +3,8 @@
 %global build_timestamp %(date +"%Y%m%d%H%M%%S")
 
 Name:               greenboot
-Version:            0.4
-Release:            2%{?dist}
+Version:            0.5
+Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 URL:                https://github.com/%{github_owner}/%{github_project}
