@@ -1,0 +1,10 @@
+[Unit]
+Description=greenboot MotD Generator
+After=greenboot-healthcheck.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/greenboot/greenboot_motdgen.sh
+
+[Install]
+WantedBy=greenboot.service redboot.service

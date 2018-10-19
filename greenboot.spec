@@ -57,23 +57,21 @@ Requires:           %{name} = %{version}-%{release}
 
 %install
 install -Dpm 0755 usr/libexec/greenboot/greenboot.sh %{buildroot}%{_libexecdir}/%{name}/%{name}.sh
+install -Dpm 0755 usr/libexec/greenboot/greenboot_motdgen.sh %{buildroot}%{_libexecdir}/%{name}/%{name}_motdgen.sh
 install -Dpm 0644 usr/lib/systemd/system/greenboot.target %{buildroot}%{_unitdir}/greenboot.target
 install -Dpm 0644 usr/lib/systemd/system/greenboot-healthcheck.service %{buildroot}%{_unitdir}/greenboot-healthcheck.service
 install -Dpm 0644 usr/lib/systemd/system/greenboot.service %{buildroot}%{_unitdir}/greenboot.service
 install -Dpm 0644 usr/lib/systemd/system/redboot.service %{buildroot}%{_unitdir}/redboot.service
-mkdir -p %{buildroot}/run/%{name}
-mkdir -p %{buildroot}%{_sysconfdir}/motd.d
+install -Dpm 0644 usr/lib/systemd/system/greenboot-motdgen.service %{buildroot}%{_unitdir}/greenboot-motdgen.service
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
-mkdir    %{buildroot}%{_sysconfdir}/%{name}/motd
 install -Dpm 0755 etc/greenboot/check/required.d/* %{buildroot}%{_sysconfdir}/%{name}/check/required.d
 install -Dpm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 install -Dpm 0755 etc/greenboot/green.d/* %{buildroot}%{_sysconfdir}/%{name}/green.d
 install -Dpm 0755 etc/greenboot/red.d/* %{buildroot}%{_sysconfdir}/%{name}/red.d
-install -Dpm 0644 etc/greenboot/motd/* %{buildroot}%{_sysconfdir}/%{name}/motd
-ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
+install -Dpm 0644 etc/greenboot/motd %{buildroot}%{_sysconfdir}/%{name}/motd
 
 %post
 %systemd_post greenboot.target
@@ -81,17 +79,26 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %systemd_post greenboot-healthcheck.service
 %systemd_post redboot.service
 
+%post motd
+%systemd_post greenboot-motdgen.service
+
 %preun
 %systemd_preun greenboot.target
 %systemd_preun greenboot.service
 %systemd_preun greenboot-healthcheck.service
 %systemd_preun redboot.service
 
+%preun motd
+%systemd_preun greenboot-motdgen.service
+
 %postun
 %systemd_postun_with_restart greenboot.target
 %systemd_postun_with_restart greenboot.service
 %systemd_postun_with_restart greenboot-healthcheck.service
 %systemd_postun_with_restart redboot.service
+
+%postun motd
+%systemd_postun greenboot-motdgen.service
 
 %check
 # TODO
@@ -115,11 +122,9 @@ ln -snf /run/greenboot/motd %{buildroot}%{_sysconfdir}/motd.d/%{name}
 %dir %{_sysconfdir}/%{name}/red.d
 
 %files motd
-%dir /run/%{name}
-%config(noreplace) %{_sysconfdir}/motd.d/%{name}
-%config %{_sysconfdir}/%{name}/motd/
-%{_sysconfdir}/%{name}/green.d/50_greenboot_motd.sh
-%{_sysconfdir}/%{name}/red.d/50_redboot_motd.sh
+%config %{_sysconfdir}/%{name}/motd
+%{_libexecdir}/%{name}/%{name}_motdgen.sh
+%{_unitdir}/greenboot-motdgen.service
 
 %files ostree-grub2
 %{_sysconfdir}/%{name}/green.d/01_ostree_grub2_fallback.sh
