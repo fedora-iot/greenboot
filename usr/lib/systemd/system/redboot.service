@@ -11,4 +11,4 @@ Conflicts=greenboot.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh red
+ExecStart=/usr/libexec/greenboot/greenboot red
