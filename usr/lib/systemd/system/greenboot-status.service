@@ -4,7 +4,8 @@ After=greenboot-healthcheck.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot_motdgen.sh
+ExecStart=/usr/libexec/greenboot/greenboot-status
 
 [Install]
-WantedBy=greenboot.service redboot.service
+WantedBy=greenboot.service
+WantedBy=redboot.service

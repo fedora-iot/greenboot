@@ -1,0 +1,33 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ ! -f /run/motd.d/boot-status ]; then
+    if [ ! -d /run/motd.d ]; then
+        mkdir /run/motd.d
+    fi
+    touch /run/motd.d/boot-status
+fi
+
+if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
+    # greenboot logs from current boot
+    status=$(journalctl -u greenboot.service -p 0..5 -b -0 -o cat)
+else
+    # redboot logs from current boot
+    status=$(journalctl -u redboot.service -p 0..5 -b -0 -o cat)
+    # healthcheck logs from current boot
+    status+=$(journalctl -u greenboot-healthcheck.service -p 0..2 -b 0 -o cat)
+fi
+
+# TODO: Show initial and current boot_counter values in status
+# If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
+if grub2-editenv list | grep -q "^boot_counter=-1$"; then
+    status+=$'The current boot seems to be a fallback boot!\nHealth check logs from previous boot:\n'
+    status+=$(journalctl -u greenboot-healthcheck.service -p 0..2 -b -1 -o cat)
+fi
+
+if [ "$status" = "" ]; then
+    status=$'Warning: No greenboot logs could be found!\n'
+fi
+
+echo "$status" | tee /run/motd.d/boot-status
