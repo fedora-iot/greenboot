@@ -1,33 +1,39 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 IFS=$'\n\t'
 
-if [ ! -f /run/motd.d/boot-status ]; then
-    if [ ! -d /run/motd.d ]; then
-        mkdir /run/motd.d
-    fi
-    touch /run/motd.d/boot-status
+if [ ! -d /etc/motd.d ]; then
+    mkdir /etc/motd.d
 fi
+
+if [ ! -f /etc/greenboot/boot-status ]; then
+    touch /etc/greenboot/boot-status
+fi
+
+status=""
 
 if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
     # greenboot logs from current boot
-    status=$(journalctl -u greenboot.service -p 0..5 -b -0 -o cat)
+    status+="$(journalctl -u greenboot.service -p 0..5 -b -0 -o cat)"
 else
     # redboot logs from current boot
-    status=$(journalctl -u redboot.service -p 0..5 -b -0 -o cat)
+    status+="$(journalctl -u redboot.service -p 0..5 -b -0 -o cat)"
     # healthcheck logs from current boot
-    status+=$(journalctl -u greenboot-healthcheck.service -p 0..2 -b 0 -o cat)
+    status+=$'\n'"$(journalctl -u greenboot-healthcheck.service -p 0..2 -b 0 -o cat)"
 fi
 
-# TODO: Show initial and current boot_counter values in status
+if [ -z $status ]; then
+    status+=$'\nWARNING: No greenboot logs were found!'
+fi
+
+# TODO: Show initial/max and current boot_counter values in status
 # If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
-if grub2-editenv list | grep -q "^boot_counter=-1$"; then
-    status+=$'The current boot seems to be a fallback boot!\nHealth check logs from previous boot:\n'
-    status+=$(journalctl -u greenboot-healthcheck.service -p 0..2 -b -1 -o cat)
+counter="$(grub2-editenv list | sed -n 's/boot_counter=//p')"
+
+if [ "$counter" = "-1" ]; then
+    status+=$'\nFALLBACK BOOT DETECTED!\nHealth check logs from previous boot:'
+    status+=$'\n'"$(journalctl -u greenboot-healthcheck.service -p 0..2 -b -1 -o cat)"
 fi
 
-if [ "$status" = "" ]; then
-    status=$'Warning: No greenboot logs could be found!\n'
-fi
-
-echo "$status" | tee /run/motd.d/boot-status
+echo "$status" | tee /etc/greenboot/boot-status
+ln -snf /etc/greenboot/boot-status /etc/motd.d/boot-status
