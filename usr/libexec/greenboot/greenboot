@@ -7,7 +7,7 @@ script_runner () {
   local mode=$1; shift
   local start_msg=$1; shift
   echo "$start_msg"
-  for script in `find $scripts_dir -name '*.sh'`; do
+  for script in $(find $scripts_dir -name '*.sh'); do
     local rc=0
     systemd-cat -t "$(basename $script)" bash $script || rc=$?
     if [ $rc -ne 0 ]; then

@@ -6,9 +6,12 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Health Check Scripts Runner
-Before=greenboot.target
+Description=greenboot Health Checks Runner
+Before=boot-complete.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh check
+ExecStart=/usr/libexec/greenboot/greenboot check
+
+[Install]
+RequiredBy=boot-complete.target

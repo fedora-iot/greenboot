@@ -1,0 +1,39 @@
+#!/bin/bash
+set -eu
+IFS=$'\n\t'
+
+if [ ! -d /etc/motd.d ]; then
+    mkdir /etc/motd.d
+fi
+
+if [ ! -f /etc/greenboot/boot-status ]; then
+    touch /etc/greenboot/boot-status
+fi
+
+status=""
+
+if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
+    # greenboot logs from current boot
+    status+="$(journalctl -u greenboot.service -p 0..5 -b -0 -o cat)"
+else
+    # redboot logs from current boot
+    status+="$(journalctl -u redboot.service -p 0..5 -b -0 -o cat)"
+    # healthcheck logs from current boot
+    status+=$'\n'"$(journalctl -u greenboot-healthcheck.service -p 0..2 -b 0 -o cat)"
+fi
+
+if [ -z $status ]; then
+    status+=$'\nWARNING: No greenboot logs were found!'
+fi
+
+# TODO: Show initial/max and current boot_counter values in status
+# If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
+counter="$(grub2-editenv list | sed -n 's/boot_counter=//p')"
+
+if [ "$counter" = "-1" ]; then
+    status+=$'\nFALLBACK BOOT DETECTED!\nHealth check logs from previous boot:'
+    status+=$'\n'"$(journalctl -u greenboot-healthcheck.service -p 0..2 -b -1 -o cat)"
+fi
+
+echo "$status" | tee /etc/greenboot/boot-status
+ln -snf /etc/greenboot/boot-status /etc/motd.d/boot-status

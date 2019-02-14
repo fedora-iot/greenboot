@@ -7,8 +7,14 @@
 
 [Unit]
 Description=greenboot Success Scripts Runner
-Requires=greenboot.target
+Requires=boot-complete.target
+After=boot-complete.target
+OnFailure=redboot.service
+OnFailureJobMode=fail
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/greenboot/greenboot.sh green
+ExecStart=/usr/libexec/greenboot/greenboot green
+
+[Install]
+WantedBy=multi-user.target

@@ -1,9 +1,26 @@
 # greenboot
 Generic Health Check Framework for systemd
 
-## Usage
-The following directory structure is created:
+## Installation
+On Fedora Silverblue, IoT or Atomic Host:
+```
+rpm-ostree install greenboot greenboot-status greenboot-ostree-grub2
 
+systemctl reboot
+```
+
+## Usage
+Place shell scripts representing *health checks* that **MUST NOT FAIL** in the `/etc/greenboot/check/required.d` directory. 
+Place shell scripts representing *health checks* that **MAY FAIL** in the `/etc/greenboot/check/wanted.d` directory.
+Place shell scripts you want to run *after* a boot has been declared **successful** in `/etc/greenboot/green.d`.
+Place shell scripts you want to run *after* a boot has been declared **failed** in `/etc/greenboot/red.d`.
+
+Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot greenboot-healthcheck greenboot-status`.
+It will automatically start during the next boot process and run its checks.
+
+When you `ssh` into the machine after that, a boot status message will be shown.
+
+Directory structure: 
 ```
 /etc
 └── greenboot
@@ -14,40 +31,39 @@ The following directory structure is created:
     └── red.d
 ```
 
-### Custom Health Checks
-You have multiple options to customize greenboot’s health checking behaviour:
 
-* Drop scripts representing health checks that MUST NOT FAIL in order to reach a GREEN boot status into `/etc/greenboot/check/required.d`.
-* Drop scripts representing health checks that MAY FAIL into `/etc/greenboot/check/wanted.d`.
-* Create oneshot health check service units that MUST NOT FAIL like the following and drop them into `/etc/systemd/system` (don't forget to `systemctl enable` them afterwards):
+## Health Checks with systemd services
+Overall boot success is measured against `boot-success.target`.
+Ordering of units can be achieved using standard systemd vocabulary.
+
+### Required Checks
+Create a oneshot health check service unit that **MUST NOT FAIL**, e.g. `/etc/systemd/system/required-check.service`. Run `systemctl enable required-check` to enable it.
+
 ```
 [Unit]
 Description=Custom Required Health Check
-Before=greenboot.target
+Before=boot-complete.target
 
 [Service]
 Type=oneshot
-ExecStart=/path/to/service
+ExecStart=/usr/libexec/mytestsuite/required-check
 
 [Install]
-RequiredBy=greenboot.target
+RequiredBy=boot-complete.target
 ```
-* Create oneshot health check service units that MAY FAIL like the following and drop them into `/etc/systemd/system` (don't forget to `systemctl enable` them afterwards):
+
+### Wanted Checks
+Create a oneshot health check service unit that **MAY FAIL**, e.g. `/etc/systemd/system/wanted-check.service`. Run `systemctl enable wanted-check` to enable it. 
+
 ```
 [Unit]
 Description=Custom Wanted Health Check
-Before=greenboot.target
+Before=boot-complete.target
 
 [Service]
 Type=oneshot
-ExecStart=/path/to/service
+ExecStart=/usr/libexec/mytestsuite/wanted-check
 
 [Install]
-WantedBy=greenboot.target
+RequiredBy=boot-complete.target
 ```
-
-### Custom GREEN Status Procedures
-* Drop scripts representing procedures you want to run after a GREEN boot status has been reached into `/etc/greenboot/green.d`.
-
-### Custom RED Status Procedures
-* Drop scripts representing procedures you want to run after a RED boot status has been reached into `/etc/greenboot/red.d`.
