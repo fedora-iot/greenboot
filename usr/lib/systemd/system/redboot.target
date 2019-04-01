@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
 #  This file is part of greenboot.
 #
 #  greenboot is free software; you can redistribute it and/or modify it
@@ -6,12 +8,5 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Failing Check Example
-Before=boot-complete.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/false
-
-[Install]
-RequiredBy=boot-complete.target
+Description=Generic red boot target
+Conflicts=boot-complete.target

@@ -33,7 +33,7 @@ Directory structure:
 
 
 ## Health Checks with systemd services
-Overall boot success is measured against `boot-success.target`.
+Overall boot success is measured against `boot-complete.target`.
 Ordering of units can be achieved using standard systemd vocabulary.
 
 ### Required Checks

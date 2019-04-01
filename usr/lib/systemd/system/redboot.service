@@ -1,3 +1,5 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
 #  This file is part of greenboot.
 #
 #  greenboot is free software; you can redistribute it and/or modify it
@@ -7,8 +9,12 @@
 
 [Unit]
 Description=greenboot Failure Scripts Runner
-Conflicts=greenboot.service
+Before=redboot.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot/greenboot red
+
+[Install]
+RequiredBy=redboot.target
