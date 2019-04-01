@@ -1,0 +1,22 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  This file is part of greenboot.
+#
+#  greenboot is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+
+[Unit]
+Description=Mark boot as successful in grubenv
+Requires=boot-complete.target
+After=boot-complete.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/grub2-editenv - set boot_success=1
+ExecStart=/usr/bin/grub2-editenv - unset boot_counter
+
+[Install]
+RequiredBy=greenboot.service
