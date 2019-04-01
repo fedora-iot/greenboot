@@ -11,7 +11,7 @@ In order to be able to easily check the motd output, the preferred way of testin
 # Ensure the following rpms are installed:
 # greenboot greenboot-auto-update-fallback greenboot-status
 # otherwise install them:
-build=00876193 && \
+build=00876215 && \
     curl https://copr-be.cloud.fedoraproject.org/results/lorbus/greenboot/fedora-30-x86_64/$build-greenboot/greenboot-0.7-1.fc30.noarch.rpm --output greenboot-0.7-1.fc30.noarch.rpm && \
     curl https://copr-be.cloud.fedoraproject.org/results/lorbus/greenboot/fedora-30-x86_64/$build-greenboot/greenboot-grub2-0.7-1.fc30.noarch.rpm --output greenboot-grub2-0.7-1.fc30.noarch.rpm && \
     curl https://copr-be.cloud.fedoraproject.org/results/lorbus/greenboot/fedora-30-x86_64/$build-greenboot/greenboot-reboot-0.7-1.fc30.noarch.rpm --output greenboot-reboot-0.7-1.fc30.noarch.rpm && \
