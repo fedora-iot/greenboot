@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+# Determine if the current boot is a fallback boot
+if grub2-editenv list | grep -q "^boot_counter=-1$"; then
+  # If booted into fallback deployment, clean up bootloader entries (rollback)
+  prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)"||""
+  rpm-ostree rollback
+  echo "<3>FALLBACK BOOT DETECTED! Default rpm-ostree deployment has been rolled back."
+  if [ -n "$prev_logs" ]; then
+    echo "<3>Health check logs from previous boot:"
+    echo "<3>$prev_logs"
+  fi
+  grub2-editenv - unset boot_counter
+fi
