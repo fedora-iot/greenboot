@@ -1,11 +1,22 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  This file is part of greenboot.
+#
+#  greenboot is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+
 [Unit]
 Description=greenboot MotD Generator
 After=greenboot-healthcheck.service
+After=greenboot.service
+After=redboot.service
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot/greenboot-status
 
 [Install]
-WantedBy=greenboot.service
-WantedBy=redboot.service
+WantedBy=multi-user.target
