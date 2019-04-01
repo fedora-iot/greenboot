@@ -7,11 +7,11 @@
 
 [Unit]
 Description=greenboot Failing Check Example
-Before=greenboot.service
+Before=boot-complete.target
 
 [Service]
 Type=oneshot
 ExecStart=/bin/false
 
 [Install]
-RequiredBy=greenboot.target
+RequiredBy=boot-complete.target
