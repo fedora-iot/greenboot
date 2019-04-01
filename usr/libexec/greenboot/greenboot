@@ -32,7 +32,7 @@ case "$1" in
     script_runner "/etc/greenboot/check/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     ;;
   "green")
-    echo "<5>Boot Status is GREEN - Health Check SUCCESS!"
+    echo "<5>Boot Status is GREEN - Health Check SUCCESS"
     script_runner "/etc/greenboot/green.d" "relaxed" "Running Green Scripts..."
     ;;
   "red")
