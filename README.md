@@ -65,5 +65,5 @@ Type=oneshot
 ExecStart=/usr/libexec/mytestsuite/wanted-check
 
 [Install]
-RequiredBy=boot-complete.target
+WantedBy=boot-complete.target
 ```
