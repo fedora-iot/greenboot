@@ -12,6 +12,11 @@ else
     status+="$(journalctl -u redboot.service -p 0 -b -0 -o cat)"$'\n'
     # healthcheck logs from current boot
     status+="$(journalctl -u greenboot-healthcheck.service -p 2 -b -0 -o cat)"$'\n'
+    # redboot-auto-reboot.service logs from current boot
+    reboot_info="$(journalctl -u redboot-auto-reboot -p 1 -b -0 -o cat)"||""
+    if [ -n "$reboot_info" ]; then
+        status+="$reboot_info"
+    fi
 fi
 
 if [ -z "$status" ]; then
@@ -20,7 +25,7 @@ fi
 
 # TODO: Show initial/max and current boot_counter values in status
 # If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
-fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback -b -0 -p 3 -o cat)"
+fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback -b -0 -p 3 -o cat)"||""
 if [ -n "$fallback_info" ]; then
     status+="$fallback_info"
 fi

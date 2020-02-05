@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+# In case we've booted into our fallback deployment and still don't reach boot-complete.target, do nothing.
+if grub2-editenv list | grep -q "^boot_counter=-1$"; then
+  echo "<0>FALLBACK BOOT DETECTED but SYSTEM is still UNHEALTHY. Cannot proceed."
+  exit 1
+fi
+
+echo "<1>SYSTEM is UNHEALTHY. Rebooting..."
