@@ -14,5 +14,10 @@ After=redboot.service
 Wants=redboot.service
 SuccessAction=reboot
 
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/greenboot/redboot-auto-reboot-check
+
 [Install]
 WantedBy=redboot.target
