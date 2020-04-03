@@ -4,7 +4,7 @@ Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 
-%global repo_owner  LorbusChris
+%global repo_owner  fedora-iot
 %global repo_name   %{name}
 %global repo_tag    v%{version}
 
@@ -176,6 +176,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %changelog
 * Fri Apr 03 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.9-1
 - Update to v0.9
+- Update repo_owner
 
 * Wed Feb 05 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.8-1
 - Update to v0.8
