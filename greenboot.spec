@@ -1,5 +1,5 @@
 Name:               greenboot
-Version:            0.8
+Version:            0.9
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -67,16 +67,15 @@ Requires:           %{name} = %{version}-%{release}
 %build
 
 %install
+mkdir -p %{buildroot}%{_exec_prefix}/lib/motd.d/
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
 mkdir -p %{buildroot}%{_unitdir}
-install -DpZm 0755 usr/libexec/greenboot/greenboot %{buildroot}%{_libexecdir}/%{name}/%{name}
-install -DpZm 0755 usr/libexec/greenboot/greenboot-grub2-set-counter %{buildroot}%{_libexecdir}/%{name}/greenboot-grub2-set-counter
-install -DpZm 0755 usr/libexec/greenboot/greenboot-rpm-ostree-grub2-check-fallback %{buildroot}%{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback
-install -DpZm 0755 usr/libexec/greenboot/greenboot-status %{buildroot}%{_libexecdir}/%{name}/greenboot-status
-install -DpZm 0755 usr/libexec/greenboot/redboot-auto-reboot-check %{buildroot}%{_libexecdir}/%{name}/redboot-auto-reboot-check
+mkdir -p %{buildroot}%{_tmpfilesdir}
+install -DpZm 0755 usr/libexec/greenboot/* %{buildroot}%{_libexecdir}/%{name}
 install -DpZm 0644 usr/lib/motd.d/boot-status %{buildroot}%{_exec_prefix}/lib/motd.d/boot-status
 install -DpZm 0644 usr/lib/systemd/system/* %{buildroot}%{_unitdir}
 install -DpZm 0644 usr/lib/tmpfiles.d/greenboot-status-motd.conf %{buildroot}%{_tmpfilesdir}/greenboot-status-motd.conf
@@ -86,6 +85,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %post
 %systemd_post greenboot-healthcheck.service
 %systemd_post greenboot.service
+%systemd_post greenboot.target
 %systemd_post redboot.service
 %systemd_post redboot.target
 
@@ -121,6 +121,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %postun
 %systemd_postun greenboot-healthcheck.service
 %systemd_postun greenboot.service
+%systemd_postun greenboot.target
 %systemd_postun redboot.service
 %systemd_postun redboot.target
 
@@ -141,6 +142,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_libexecdir}/%{name}/%{name}
 %{_unitdir}/greenboot-healthcheck.service
 %{_unitdir}/greenboot.service
+%{_unitdir}/greenboot.target
 %{_unitdir}/redboot.service
 %{_unitdir}/redboot.target
 %dir %{_sysconfdir}/%{name}
@@ -168,10 +170,13 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/greenboot-grub2-set-counter.service
 
 %files reboot
-%{_libexecdir}/%{name}/redboot-auto-reboot-check
+%{_libexecdir}/%{name}/redboot-auto-reboot
 %{_unitdir}/redboot-auto-reboot.service
 
 %changelog
+* Fri Apr 03 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.9-1
+- Update to v0.9
+
 * Wed Feb 05 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.8-1
 - Update to v0.8
 - Add guard against bootlooping in redboot-auto-reboot.service
