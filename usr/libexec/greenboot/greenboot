@@ -1,17 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 IFS=$'\n\t'
+LC_ALL=C
 
 script_runner () {
   local scripts_dir=$1; shift
   local mode=$1; shift
   local start_msg=$1; shift
   echo "$start_msg"
-  for script in $(find $scripts_dir -name '*.sh'); do
+  for script in $(find "$scripts_dir" -name '*.sh' | sort); do
     local rc=0
-    systemd-cat -t "$(basename $script)" bash $script || rc=$?
+    systemd-cat -t "$(basename "$script")" bash "$script" || rc=$?
     if [ $rc -ne 0 ]; then
-      local failure_msg="Script '$(basename $script)' FAILURE (exit code '$rc')"
+      local failure_msg
+      failure_msg="Script '$(basename "$script")' FAILURE (exit code '$rc')"
       case "$mode" in
         "relaxed")
           echo "<2>$failure_msg. Continuing..." >&2
@@ -21,7 +23,7 @@ script_runner () {
           exit $rc
       esac
     else
-      echo "<6>Script '$(basename $script)' SUCCESS"
+      echo "<6>Script '$(basename "$script")' SUCCESS"
     fi
   done
 }

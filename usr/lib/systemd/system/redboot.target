@@ -10,3 +10,4 @@
 [Unit]
 Description=Generic red boot target
 Conflicts=boot-complete.target
+Conflicts=greenboot.target

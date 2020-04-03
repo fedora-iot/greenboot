@@ -8,15 +8,11 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=Set grub2 boot counter in preparation of upgrade
-DefaultDependencies=no
-Before=ostree-finalize-staged.service
-Conflicts=greenboot-grub2-set-success.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot/greenboot-grub2-set-counter 3
+Description=greenboot Successful Boot Target
+Requires=boot-complete.target
+After=boot-complete.target
+OnFailure=redboot.target
+OnFailureJobMode=fail
 
 [Install]
-RequiredBy=ostree-finalize-staged.service
+WantedBy=multi-user.target

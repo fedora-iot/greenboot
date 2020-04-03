@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+bootloader_entries=(/boot/loader/entries/*)
+bootloader_entry_count=${#bootloader_entries[@]}
+
+# If boot_counter is unset, do nothing
+if ! grub2-editenv list | grep -q "^boot_counter="; then
+  echo "<0>SYSTEM is UNHEALTHY, but boot_counter is unset in grubenv. Manual intervention necessary."
+  exit 1
+# In case we've booted into our fallback deployment and still don't reach boot-complete.target, do nothing.
+elif grub2-editenv list | grep -q "^boot_counter=-1$"; then
+  echo "<0>FALLBACK BOOT DETECTED but SYSTEM is still UNHEALTHY. Manual intervention necessary."
+  exit 2
+# If we have only one (or less) bootloader entries, don't reboot
+elif [ "$bootloader_entry_count" -le 1 ]; then
+  echo "<0>SYSTEM is UNHEALTHY, but bootlader entry count is $bootloader_entry_count. Manual intervention necessary."
+  exit 3
+fi
+
+echo "<1>SYSTEM is UNHEALTHY. Rebooting..."
+reboot

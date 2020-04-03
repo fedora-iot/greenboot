@@ -2,7 +2,7 @@
 set -euo pipefail
 
 max_boot_attempts=${1:-3} # default to 3 attempts
-grub2-editenv - set boot_counter=$max_boot_attempts
+grub2-editenv - set boot_counter="$max_boot_attempts"
 grub2-editenv - set boot_success=0
 
 echo "<3>GRUB2 environment variables have been set for system upgrade"

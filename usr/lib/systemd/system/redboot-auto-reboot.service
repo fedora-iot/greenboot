@@ -12,12 +12,10 @@ Description=Reboot on red boot status
 DefaultDependencies=no
 After=redboot.service
 Wants=redboot.service
-SuccessAction=reboot
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot/redboot-auto-reboot-check
+ExecStart=/usr/libexec/greenboot/redboot-auto-reboot
 
 [Install]
 WantedBy=redboot.target
