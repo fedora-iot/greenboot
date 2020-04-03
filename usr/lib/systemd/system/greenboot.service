@@ -9,10 +9,8 @@
 
 [Unit]
 Description=greenboot Success Scripts Runner
-Requires=boot-complete.target
-After=boot-complete.target
-OnFailure=redboot.target
-OnFailureJobMode=fail
+Requires=greenboot.target
+After=greenboot.target
 
 [Service]
 Type=oneshot

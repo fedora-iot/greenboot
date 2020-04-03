@@ -8,6 +8,11 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=Generic red boot target
-Conflicts=boot-complete.target
-Conflicts=greenboot.target
+Description=greenboot Successful Boot Target
+Requires=boot-complete.target
+After=boot-complete.target
+OnFailure=redboot.target
+OnFailureJobMode=fail
+
+[Install]
+WantedBy=multi-user.target
