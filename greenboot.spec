@@ -50,6 +50,7 @@ Requires:           %{name}-grub2 = %{version}-%{release}
 %package grub2
 Summary:            Grub2 specific scripts for greenboot
 Requires:           %{name} = %{version}-%{release}
+Requires:           grub2-tools-minimal
 
 %description grub2
 %{summary}.
