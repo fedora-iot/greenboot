@@ -43,6 +43,7 @@ Recommends:         openssh
 Summary:            Scripts for greenboot on rpm-ostree-based systems using the Grub2 bootloader
 Requires:           %{name} = %{version}-%{release}
 Requires:           %{name}-grub2 = %{version}-%{release}
+Requires:           rpm-ostree
 
 %description rpm-ostree-grub2
 %{summary}.
@@ -50,6 +51,7 @@ Requires:           %{name}-grub2 = %{version}-%{release}
 %package grub2
 Summary:            Grub2 specific scripts for greenboot
 Requires:           %{name} = %{version}-%{release}
+Requires:           grub2-tools-minimal
 
 %description grub2
 %{summary}.
