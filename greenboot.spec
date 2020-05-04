@@ -1,6 +1,6 @@
 Name:               greenboot
 Version:            0.9
-Release:            1%{?dist}
+Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 
@@ -64,7 +64,7 @@ Requires:           %{name} = %{version}-%{release}
 %{summary}.
 
 %prep
-%setup
+%setup -q
 
 %build
 
@@ -176,6 +176,10 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/redboot-auto-reboot.service
 
 %changelog
+* Mon May 04 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.9-2
+- Added missing requires to grub2 and rpm-ostree-grub2 packages
+- Run %%setup quietly
+
 * Fri Apr 03 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.9-1
 - Update to v0.9
 - Update repo_owner
