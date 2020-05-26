@@ -9,8 +9,8 @@
 
 [Unit]
 Description=greenboot Success Scripts Runner
-Requires=greenboot.target
-After=greenboot.target
+Requires=greenboot.service
+After=greenboot.service
 
 [Service]
 Type=oneshot

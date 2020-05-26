@@ -8,7 +8,7 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Successful Boot Target
+Description=greenboot Boot Success Determination Service
 Requires=boot-complete.target
 After=boot-complete.target
 OnFailure=redboot.target
