@@ -11,7 +11,7 @@
 Description=Check for fallback boot
 Requires=boot-complete.target
 After=boot-complete.target
-Before=greenboot.service
+Before=greenboot-task-runner.service
 
 [Service]
 Type=oneshot
@@ -19,4 +19,4 @@ RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot/greenboot-rpm-ostree-grub2-check-fallback
 
 [Install]
-RequiredBy=greenboot.service
+RequiredBy=greenboot-task-runner.service
