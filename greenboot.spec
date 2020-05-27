@@ -1,6 +1,6 @@
 Name:               greenboot
-Version:            0.9
-Release:            2%{?dist}
+Version:            0.10
+Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 
@@ -86,9 +86,9 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %post
 %systemd_post greenboot-healthcheck.service
+%systemd_post greenboot-task-runner.service
 %systemd_post greenboot.service
-%systemd_post greenboot.target
-%systemd_post redboot.service
+%systemd_post redboot-task-runner.service
 %systemd_post redboot.target
 
 %post grub2
@@ -106,8 +106,8 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %preun
 %systemd_preun greenboot-healthcheck.service
-%systemd_preun greenboot.service
-%systemd_preun redboot.service
+%systemd_preun greenboot-task-runner.service
+%systemd_preun redboot-task-runner.service
 %systemd_preun redboot.target
 
 %preun grub2
@@ -122,9 +122,9 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %postun
 %systemd_postun greenboot-healthcheck.service
+%systemd_postun greenboot-task-runner.service
 %systemd_postun greenboot.service
-%systemd_postun greenboot.target
-%systemd_postun redboot.service
+%systemd_postun redboot-task-runner.service
 %systemd_postun redboot.target
 
 %postun grub2
@@ -143,9 +143,9 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/%{name}
 %{_unitdir}/greenboot-healthcheck.service
+%{_unitdir}/greenboot-task-runner.service
 %{_unitdir}/greenboot.service
-%{_unitdir}/greenboot.target
-%{_unitdir}/redboot.service
+%{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
 %dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/check

@@ -10,8 +10,8 @@
 [Unit]
 Description=Reboot on red boot status
 DefaultDependencies=no
-After=redboot.service
-Wants=redboot.service
+After=redboot-task-runner.service
+Wants=redboot-task-runner.service
 
 [Service]
 Type=oneshot

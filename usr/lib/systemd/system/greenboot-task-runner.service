@@ -8,11 +8,14 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Successful Boot Target
-Requires=boot-complete.target
-After=boot-complete.target
-OnFailure=redboot.target
-OnFailureJobMode=fail
+Description=greenboot Success Scripts Runner
+Requires=greenboot.service
+After=greenboot.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/greenboot/greenboot green
 
 [Install]
 WantedBy=multi-user.target

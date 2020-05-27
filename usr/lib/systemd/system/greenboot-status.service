@@ -10,8 +10,8 @@
 [Unit]
 Description=greenboot MotD Generator
 After=greenboot-healthcheck.service
-After=greenboot.service
-After=redboot.service
+After=greenboot-task-runner.service
+After=redboot-task-runner.service
 
 [Service]
 Type=oneshot

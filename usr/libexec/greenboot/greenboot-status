@@ -12,14 +12,14 @@ fi
 
 if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
     # greenboot logs (post healthchecks) from current boot
-    status+="$(journalctl -u greenboot.service -p 5 -b -0 -o cat)"$'\n'
+    status+="$(journalctl -u greenboot-task-runner -p 5 -b -0 -o cat)"$'\n'
 else
     # redboot logs (post healthchecks) from current boot
-    redboot_info+="$(journalctl -u redboot.service -p 0 -b -0 -o cat)"||""
+    redboot_info+="$(journalctl -u redboot-task-runner -p 0 -b -0 -o cat)"||""
     if [ -n "$redboot_info" ]; then
         status+="$redboot_info"$'\n'
     fi
-    # redboot-auto-reboot.service logs (post redboot.service) from current boot
+    # redboot-auto-reboot.service logs (post redboot-task-runner.service) from current boot
     reboot_info="$(journalctl -u redboot-auto-reboot -p 1 -b -0 -o cat)"||""
     if [ -n "$reboot_info" ]; then
         status+="$reboot_info"
