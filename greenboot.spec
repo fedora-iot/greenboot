@@ -1,5 +1,5 @@
 Name:               greenboot
-Version:            0.10
+Version:            0.10.1
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -87,7 +87,6 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %post
 %systemd_post greenboot-healthcheck.service
 %systemd_post greenboot-task-runner.service
-%systemd_post greenboot.service
 %systemd_post redboot-task-runner.service
 %systemd_post redboot.target
 
@@ -123,7 +122,6 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %postun
 %systemd_postun greenboot-healthcheck.service
 %systemd_postun greenboot-task-runner.service
-%systemd_postun greenboot.service
 %systemd_postun redboot-task-runner.service
 %systemd_postun redboot.target
 
@@ -144,7 +142,6 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_libexecdir}/%{name}/%{name}
 %{_unitdir}/greenboot-healthcheck.service
 %{_unitdir}/greenboot-task-runner.service
-%{_unitdir}/greenboot.service
 %{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
 %dir %{_sysconfdir}/%{name}
