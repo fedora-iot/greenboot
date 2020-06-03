@@ -2,7 +2,7 @@
 Generic Health Check Framework for systemd
 
 ## Installation
-On Fedora Silverblue, IoT or Atomic Host:
+On Fedora Silverblue, Fedora IoT or Fedora CoreOS:
 ```
 rpm-ostree install greenboot greenboot-status greenboot-ostree-grub2
 
@@ -43,6 +43,8 @@ Create a oneshot health check service unit that **MUST NOT FAIL**, e.g. `/etc/sy
 [Unit]
 Description=Custom Required Health Check
 Before=boot-complete.target
+OnFailure=redboot.target
+OnFailureJobMode=fail
 
 [Service]
 Type=oneshot
@@ -50,6 +52,7 @@ ExecStart=/usr/libexec/mytestsuite/required-check
 
 [Install]
 RequiredBy=boot-complete.target
+WantedBy=multi-user.target
 ```
 
 ### Wanted Checks
@@ -66,4 +69,5 @@ ExecStart=/usr/libexec/mytestsuite/wanted-check
 
 [Install]
 WantedBy=boot-complete.target
+WantedBy=multi-user.target
 ```

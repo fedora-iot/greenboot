@@ -10,6 +10,8 @@
 [Unit]
 Description=greenboot Health Checks Runner
 Before=boot-complete.target
+OnFailure=redboot.target
+OnFailureJobMode=fail
 
 [Service]
 Type=oneshot
@@ -18,3 +20,4 @@ ExecStart=/usr/libexec/greenboot/greenboot check
 
 [Install]
 RequiredBy=boot-complete.target
+WantedBy=multi-user.target
