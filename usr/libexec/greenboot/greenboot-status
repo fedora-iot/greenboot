@@ -12,17 +12,20 @@ fi
 
 if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
     # greenboot logs (post healthchecks) from current boot
-    status+="$(journalctl -u greenboot-task-runner -p 5 -b -0 -o cat)"$'\n'
+    greenboot_runner_info="$(journalctl -u greenboot-task-runner.service -p 5 -b -0 -o cat)"||""
+    if [ -n "$greenboot_runner_info" ]; then
+        status+="$greenboot_runner_info"$'\n'
+    fi
 else
     # redboot logs (post healthchecks) from current boot
-    redboot_info+="$(journalctl -u redboot-task-runner -p 0 -b -0 -o cat)"||""
-    if [ -n "$redboot_info" ]; then
-        status+="$redboot_info"$'\n'
+    redboot_runner_info="$(journalctl -u redboot-task-runner.service -p 0 -b -0 -o cat)"||""
+    if [ -n "$redboot_runner_info" ]; then
+        status+="$redboot_runner_info"$'\n'
     fi
     # redboot-auto-reboot.service logs (post redboot-task-runner.service) from current boot
-    reboot_info="$(journalctl -u redboot-auto-reboot -p 1 -b -0 -o cat)"||""
-    if [ -n "$reboot_info" ]; then
-        status+="$reboot_info"
+    redboot_reboot_info="$(journalctl -u redboot-auto-reboot.service -p 1 -b -0 -o cat)"||""
+    if [ -n "$redboot_reboot_info" ]; then
+        status+="$redboot_reboot_info"$'\n'
     fi
 fi
 
@@ -32,9 +35,9 @@ fi
 
 # TODO: Show initial/max and current boot_counter values in status
 # If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
-fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback -b -0 -p 3 -o cat)"||""
+fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback.service -b -0 -p 3 -o cat)"||""
 if [ -n "$fallback_info" ]; then
-    status+="$fallback_info"
+    status+="$fallback_info"$'\n'
 fi
 
 echo -n "$status" | tee /run/motd.d/boot-status
