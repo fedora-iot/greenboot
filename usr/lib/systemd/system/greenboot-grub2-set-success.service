@@ -19,4 +19,4 @@ ExecStart=/usr/bin/grub2-editenv - set boot_success=1
 ExecStart=/usr/bin/grub2-editenv - unset boot_counter
 
 [Install]
-RequiredBy=greenboot-task-runner.service
+RequiredBy=multi-user.target
