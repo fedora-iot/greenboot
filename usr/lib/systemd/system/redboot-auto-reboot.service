@@ -11,7 +11,6 @@
 Description=Reboot on red boot status
 DefaultDependencies=no
 After=redboot-task-runner.service
-Wants=redboot-task-runner.service
 
 [Service]
 Type=oneshot
