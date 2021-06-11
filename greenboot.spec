@@ -14,7 +14,7 @@ Source0:            https://github.com/%{repo_owner}/%{repo_name}/archive/%{repo
 BuildArch:          noarch
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
-Requires:           systemd
+Requires:           systemd >= 240
 
 %description
 %{summary}.
