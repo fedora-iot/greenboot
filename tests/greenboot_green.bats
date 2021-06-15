@@ -5,7 +5,7 @@ function setup() {
     cp testing_files/20*.sh $GREENBOOT_GREEN_PATH/
 }
 
-@test "green command" {
+@test "Test greenboot green command" {
     run $GREENBOOT_BIN_PATH green
     [ "$status" -eq 0 ]
     [[ "$output" == *"Health Check SUCCESS"* ]]

@@ -10,15 +10,25 @@ systemctl reboot
 ```
 
 ## Usage
+
+### Health checks with bash scripts
+
 Place shell scripts representing *health checks* that **MUST NOT FAIL** in the `/etc/greenboot/check/required.d` directory. 
 Place shell scripts representing *health checks* that **MAY FAIL** in the `/etc/greenboot/check/wanted.d` directory.
 Place shell scripts you want to run *after* a boot has been declared **successful** in `/etc/greenboot/green.d`.
 Place shell scripts you want to run *after* a boot has been declared **failed** in `/etc/greenboot/red.d`.
 
-Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot greenboot-healthcheck greenboot-status`.
+Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot-task-runner greenboot-healthcheck greenboot-status`.
 It will automatically start during the next boot process and run its checks.
 
-When you `ssh` into the machine after that, a boot status message will be shown.
+When you `ssh` into the machine after that, a boot status message will be shown:
+
+```
+Boot Status is GREEN - Health Check SUCCESS
+```
+```
+Boot Status is RED - Health Check FAILURE!
+```
 
 Directory structure: 
 ```
@@ -32,12 +42,12 @@ Directory structure:
 ```
 
 
-## Health Checks with systemd services
+### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.
 Ordering of units can be achieved using standard systemd vocabulary.
 
-### Required Checks
-Create a oneshot health check service unit that **MUST NOT FAIL**, e.g. `/etc/systemd/system/required-check.service`. Run `systemctl enable required-check` to enable it.
+#### Required Checks
+Create a oneshot health check service unit that **MUST NOT FAIL**, e.g. `/etc/systemd/system/required-check.service`. Make sure it calls `redboot.target` when it fails (`OnFailure=redboot.target`). Run `systemctl enable required-check` to enable it.
 
 ```
 [Unit]
@@ -55,7 +65,7 @@ RequiredBy=boot-complete.target
 WantedBy=multi-user.target
 ```
 
-### Wanted Checks
+#### Wanted Checks
 Create a oneshot health check service unit that **MAY FAIL**, e.g. `/etc/systemd/system/wanted-check.service`. Run `systemctl enable wanted-check` to enable it. 
 
 ```

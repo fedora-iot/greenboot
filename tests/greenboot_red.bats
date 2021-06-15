@@ -5,7 +5,7 @@ function setup() {
     cp testing_files/30*.sh $GREENBOOT_RED_PATH/ 
 }
 
-@test "check with wanted scripts failing" {
+@test "Test greenboot red command" {
     run $GREENBOOT_BIN_PATH red
     [ "$status" -eq 0 ]
     [[ "$output" == *"Health Check FAILURE"* ]]
