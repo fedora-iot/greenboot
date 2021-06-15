@@ -1,0 +1,13 @@
+name: Run CI tests
+on: 
+  - push
+  - pull_request
+jobs:
+  bats_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag test-image
+      - name: Run tests
+        run: docker run --rm --name test-greenboot -v /run/systemd/journal:/run/systemd/journal test-image
