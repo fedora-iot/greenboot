@@ -9,7 +9,7 @@ In order to be able to easily check the motd output, the preferred way of testin
 # ssh into your machine
 
 # Ensure the following rpms are installed:
-# greenboot greenboot-auto-update-fallback greenboot-status
+# greenboot greenboot-status
 # otherwise install them:
 build=00876215 && \
     curl https://copr-be.cloud.fedoraproject.org/results/lorbus/greenboot/fedora-30-x86_64/$build-greenboot/greenboot-0.7-1.fc30.noarch.rpm --output greenboot-0.7-1.fc30.noarch.rpm && \
@@ -29,13 +29,13 @@ sudo systemctl reboot
 # Enabling services, but let's hold off on enabling redboot-auto-reboot.service for a bit
 # so we don't get into reboot-looping through all our boot attempts (i.e. until boot_counter reaches 0)
 sudo systemctl enable \
-    greenboot \
+    greenboot-task-runner \
     greenboot-healthcheck \
     greenboot-rpm-ostree-grub2-check-fallback \
     greenboot-grub2-set-counter \
     greenboot-grub2-set-success \
     greenboot-status \
-    redboot && \
+    redboot-task-runner && \
 sudo systemctl reboot
 
 ```
@@ -53,13 +53,13 @@ sudo systemctl reboot
 # Check all our logs
 sudo journalctl -b -0 \
     -u boot-complete.target \
-    -u greenboot \
+    -u greenboot-task-runner \
     -u greenboot-healthcheck \
     -u greenboot-rpm-ostree-grub2-check-fallback \
     -u greenboot-grub2-set-counter \
     -u greenboot-grub2-set-success \
     -u greenboot-status \
-    -u redboot \
+    -u redboot-task-runner \
     -u redboot-auto-reboot \
     -u redboot.target
 
@@ -86,13 +86,13 @@ sudo systemctl reboot
 # Check all our journal logs again
 sudo journalctl -b -0 \
     -u boot-complete.target \
-    -u greenboot \
+    -u greenboot-task-runner \
     -u greenboot-healthcheck \
     -u greenboot-rpm-ostree-grub2-check-fallback \
     -u greenboot-grub2-set-counter \
     -u greenboot-grub2-set-success \
     -u greenboot-status \
-    -u redboot \
+    -u redboot-task-runner \
     -u redboot-auto-reboot \
     -u redboot.target
 
@@ -118,13 +118,13 @@ sudo systemctl reboot
 # Check all our journal logs again
 sudo journalctl -b -0 \
     -u boot-complete.target \
-    -u greenboot \
+    -u greenboot-task-runner \
     -u greenboot-healthcheck \
     -u greenboot-rpm-ostree-grub2-check-fallback \
     -u greenboot-grub2-set-counter \
     -u greenboot-grub2-set-success \
     -u greenboot-status \
-    -u redboot \
+    -u redboot-task-runner \
     -u redboot-auto-reboot \
     -u redboot.target
 

@@ -1,4 +1,11 @@
-GREENBOOT_BIN_PATH="/usr/libexec/greenboot/greenboot"
-GREENBOOT_CHECK_PATH="/etc/greenboot/check"
-GREENBOOT_GREEN_PATH="/etc/greenboot/green.d"
-GREENBOOT_RED_PATH="/etc/greenboot/red.d"
+GREENBOOT_USR_ROOT_PATH="/usr/libexec/greenboot"
+GREENBOOT_ETC_ROOT_PATH="/etc/greenboot"
+
+GREENBOOT_BIN_PATH="$GREENBOOT_USR_ROOT_PATH/greenboot"
+GRUB2_SET_COUNTER_BIN_PATH="$GREENBOOT_USR_ROOT_PATH/greenboot-grub2-set-counter"
+RPM_OSTREE_CHECK_FALLBACK_PATH="$GREENBOOT_USR_ROOT_PATH/greenboot-rpm-ostree-grub2-check-fallback"
+GRUB2_EDITENV=/usr/bin/grub2-editenv
+
+GREENBOOT_CHECK_PATH="$GREENBOOT_ETC_ROOT_PATH/check"
+GREENBOOT_GREEN_PATH="$GREENBOOT_ETC_ROOT_PATH/green.d"
+GREENBOOT_RED_PATH="$GREENBOOT_ETC_ROOT_PATH/red.d"
