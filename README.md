@@ -1,5 +1,5 @@
 # greenboot
-Generic Health Check Framework for systemd
+Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems
 
 ## Installation
 On Fedora Silverblue, Fedora IoT or Fedora CoreOS:
@@ -8,6 +8,21 @@ rpm-ostree install greenboot greenboot-status greenboot-ostree-grub2
 
 systemctl reboot
 ```
+
+## How does it work?
+- `greenboot-rpm-ostree-grub2-check-fallback.service` runs **before** `greenboot-healthcheck.service` and checks whether the GRUB2 environment variable `boot_counter` is -1. 
+  - If it is -1, this would mean that the system is in a fallback deployment and would execute `rpm-ostree rollback` to go back to the previous, working deployment. 
+  - If `boot_counter` is not -1, nothing is done in this step.
+- `greenboot-healthcheck.service` runs **before** systemd's [boot-complete.target](https://www.freedesktop.org/software/systemd/man/systemd.special.html#boot-complete.target). It launches `/usr/libexec/greenboot/greenboot check`, which runs the `required.d` and `wanted.d` scripts.
+  - If any script in the `required.d` folder fails, `redboot.target` is called.
+    - It triggers `redboot-task-runner.service`, which launches `/usr/libexec/greenboot/greenboot red`. This will run the scripts in `red.d` folder.
+    - After the above:
+      - `redboot-auto-reboot.service` is run. It performs a series of checks to determine if there's a requirement for manual intervention. If there's not, it reboots the system.
+  - If all scripts in `required.d` folder succeeded:
+    - `boot-complete.target` is reached.
+    - `greenboot-grub2-set-success.service` is run. It unsets `boot_counter` GRUB env var and sets `boot_success` GRUB env var to 1.
+    - `greenboot-task-runner.service` launches `/usr/libexec/greenboot/greenboot green`, which runs the scripts in `green.d` folder, scripts that are meant to be run after a successful update.
+    - `greenboot-status.service` is run, creating the MOTD with a success message.
 
 ## Usage
 
