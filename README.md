@@ -11,6 +11,15 @@ systemctl reboot
 
 ## Usage
 
+### Configuration
+At the moment, it is possible to customize the following parameters via environment variables. These environment variables can be described as well in the config file `/etc/greenboot/greenboot.conf`:
+- **GREENBOOT_MAX_BOOT_ATTEMPTS**. Maximum number of boot attempts.
+
+#### Sample `etc/greenboot/greenboot.conf` file
+``` bash
+GREENBOOT_MAX_BOOT_ATTEMPTS=2
+```
+
 ### Health checks with bash scripts
 
 Place shell scripts representing *health checks* that **MUST NOT FAIL** in the `/etc/greenboot/check/required.d` directory. 

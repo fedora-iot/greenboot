@@ -16,7 +16,7 @@ Conflicts=greenboot-grub2-set-success.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot/greenboot-grub2-set-counter 3
+ExecStart=/usr/libexec/greenboot/greenboot-grub2-set-counter
 
 [Install]
 RequiredBy=ostree-finalize-staged.service
