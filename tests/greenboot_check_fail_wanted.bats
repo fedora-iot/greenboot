@@ -1,7 +1,7 @@
 load common.bash
 
 function setup() {
-    cp testing_files/10*.sh $GREENBOOT_CHECK_PATH/wanted.d/ 
+    cp testing_files/10*.sh $GREENBOOT_CHECK_PATH/wanted.d/
 }
 
 @test "Test greenboot check with wanted scripts failing" {
@@ -10,5 +10,5 @@ function setup() {
 }
 
 function teardown() {
-    rm $GREENBOOT_CHECK_PATH/wanted.d/10*.sh    
+    rm $GREENBOOT_CHECK_PATH/wanted.d/10*.sh
 }

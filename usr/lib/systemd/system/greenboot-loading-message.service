@@ -8,18 +8,14 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=greenboot Health Checks Runner
-Before=boot-complete.target
-After=network-online.target
-Wants=network-online.target
-OnFailure=redboot.target
-OnFailureJobMode=fail
+Description=greenboot message on MOTD while checks are being performed
+After=greenboot-rpm-ostree-grub2-check-fallback.service
+Before=greenboot-healthcheck.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot/greenboot check
+ExecStart=/usr/libexec/greenboot/greenboot-loading-message
 
 [Install]
-RequiredBy=boot-complete.target
 WantedBy=multi-user.target

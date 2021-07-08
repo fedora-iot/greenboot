@@ -86,6 +86,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %post
 %systemd_post greenboot-healthcheck.service
+%systemd_post greenboot-loading-message.service
 %systemd_post greenboot-task-runner.service
 %systemd_post redboot-task-runner.service
 %systemd_post redboot.target
@@ -105,6 +106,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %preun
 %systemd_preun greenboot-healthcheck.service
+%systemd_preun greenboot-loading-message.service
 %systemd_preun greenboot-task-runner.service
 %systemd_preun redboot-task-runner.service
 %systemd_preun redboot.target
@@ -121,6 +123,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %postun
 %systemd_postun greenboot-healthcheck.service
+%systemd_postun greenboot-loading-message.service
 %systemd_postun greenboot-task-runner.service
 %systemd_postun redboot-task-runner.service
 %systemd_postun redboot.target
@@ -140,7 +143,9 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %license LICENSE
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/%{name}
+%{_libexecdir}/%{name}/greenboot-loading-message
 %{_unitdir}/greenboot-healthcheck.service
+%{_unitdir}/greenboot-loading-message.service
 %{_unitdir}/greenboot-task-runner.service
 %{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
@@ -148,8 +153,10 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %dir %{_sysconfdir}/%{name}/check
 %dir %{_sysconfdir}/%{name}/check/required.d
 %{_sysconfdir}/%{name}/check/required.d/00_required_scripts_start.sh
+%{_sysconfdir}/%{name}/check/required.d/01_repository_dns_check.sh
 %dir %{_sysconfdir}/%{name}/check/wanted.d
 %{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
+%{_sysconfdir}/%{name}/check/wanted.d/01_update_platforms_check.sh
 %dir %{_sysconfdir}/%{name}/green.d
 %dir %{_sysconfdir}/%{name}/red.d
 
@@ -173,6 +180,12 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/redboot-auto-reboot.service
 
 %changelog
+* Tue Jul 06 2021 Jose Noguera <jnoguera@redhat.com> - 0.11.0-2
+- Add ability to configure maximum number of boot attempts via env var and config file.
+- Add How does it work section to README.
+- Add CI via GitHub Actions and unit testing with BATS.
+- Add repository DNS checker as required health check out of the box
+
 * Thu Aug 13 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.11.0-1
 - Update to 0.11.0
 
