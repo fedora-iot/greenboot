@@ -65,6 +65,8 @@ Directory structure:
     └── red.d
 ```
 
+#### Health checks included with Greenboot
+- **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 
 ### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.

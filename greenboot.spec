@@ -173,6 +173,12 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/redboot-auto-reboot.service
 
 %changelog
+* Tue Jul 06 2021 Jose Noguera <jnoguera@redhat.com> - 0.11.0-2
+- Add ability to configure maximum number of boot attempts via env var and config file.
+- Add How does it work section to README.
+- Add CI via GitHub Actions and unit testing with BATS.
+- Add repository DNS checker as required health check out of the box
+
 * Thu Aug 13 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.11.0-1
 - Update to 0.11.0
 
