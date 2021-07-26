@@ -10,8 +10,6 @@
 [Unit]
 Description=greenboot Health Checks Runner
 Before=boot-complete.target
-After=network-online.target
-Wants=network-online.target
 OnFailure=redboot.target
 OnFailureJobMode=fail
 

@@ -2,12 +2,21 @@
 Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems
 
 ## Installation
-On Fedora Silverblue, Fedora IoT or Fedora CoreOS:
+Greenboot is very modular. It's comprised of several sub-packages, each of them adding specific functionalities.
+
+In order to get a full Greenboot installationon Fedora Silverblue, Fedora IoT or Fedora CoreOS:
 ```
-rpm-ostree install greenboot greenboot-status greenboot-ostree-grub2
+rpm-ostree install greenboot greenboot-status greenboot-rpm-ostree-grub2 greenboot-grub2 greenboot-reboot greenboot-update-platforms-check
 
 systemctl reboot
 ```
+
+### Subpackages
+- **status:** Posts Greenboot status to MOTD.
+- **rpm-ostree-grub2:** Checks if current boot it's a fallback boot.
+- **grub2:** Sets GRUB2 environment variables that will be taken into account for determine the status of the boot.
+- **reboot:** Reboots the system in case Greenboot checks haven't passed.
+- **update-platforms-check:** Checks if the update platforms are still reachable and DNS resolvable.
 
 ## How does it work?
 - `greenboot-rpm-ostree-grub2-check-fallback.service` runs **before** `greenboot-healthcheck.service` and checks whether the GRUB2 environment variable `boot_counter` is -1. 
@@ -66,6 +75,7 @@ Directory structure:
 ```
 
 #### Health checks included with Greenboot
+The `greenboot-update-platforms-check` subpackage ships with the following checks:
 - **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 - **Check if update platforms are still reachable**: This script is under `/etc/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
 
