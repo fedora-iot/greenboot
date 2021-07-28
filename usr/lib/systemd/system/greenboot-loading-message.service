@@ -1,0 +1,21 @@
+#  SPDX-License-Identifier: LGPL-2.1+
+#
+#  This file is part of greenboot.
+#
+#  greenboot is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+
+[Unit]
+Description=greenboot message on MOTD while checks are being performed
+After=greenboot-rpm-ostree-grub2-check-fallback.service
+Before=greenboot-healthcheck.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/greenboot/greenboot-loading-message
+
+[Install]
+WantedBy=multi-user.target

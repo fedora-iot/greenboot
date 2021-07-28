@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "GREENBOOT is currently performing the provided checks." | tee /run/motd.d/boot-status
+echo -n "Log in again in a minute or check /run/motd.d/boot-status to know the result of the checks" | tee --append /run/motd.d/boot-status
