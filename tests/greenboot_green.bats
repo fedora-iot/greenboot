@@ -2,7 +2,7 @@ load common.bash
 
 function setup() {
     mkdir -p $GREENBOOT_GREEN_PATH
-    cp testing_files/20*.sh $GREENBOOT_GREEN_PATH/
+    cp testing_files/20_green_script.sh $GREENBOOT_GREEN_PATH/
 }
 
 @test "Test greenboot green command" {
@@ -12,5 +12,5 @@ function setup() {
 }
 
 function teardown() {
-    rm $GREENBOOT_GREEN_PATH/20*.sh
+    rm $GREENBOOT_GREEN_PATH/20_green_script.sh
 }

@@ -63,6 +63,13 @@ Requires:           %{name} = %{version}-%{release}
 %description reboot
 %{summary}.
 
+%package update-platforms-check
+Summary:            Update platforms DNS resolution and connection check for greenboot
+Requires:           %{name} = %{version}-%{release}
+
+%description update-platforms-check
+%{summary}.
+
 %prep
 %setup -q
 
@@ -76,16 +83,20 @@ mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
 mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
 mkdir -p %{buildroot}%{_tmpfilesdir}
 install -DpZm 0755 usr/libexec/greenboot/* %{buildroot}%{_libexecdir}/%{name}
 install -DpZm 0644 usr/lib/motd.d/boot-status %{buildroot}%{_exec_prefix}/lib/motd.d/boot-status
-install -DpZm 0644 usr/lib/systemd/system/* %{buildroot}%{_unitdir}
+install -DpZm 0644 usr/lib/systemd/system/greenboot-healthcheck.service.d/10-network-online.conf %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
+install -DpZm 0644 usr/lib/systemd/system/*.target %{buildroot}%{_unitdir}
+install -DpZm 0644 usr/lib/systemd/system/*.service %{buildroot}%{_unitdir}
 install -DpZm 0644 usr/lib/tmpfiles.d/greenboot-status-motd.conf %{buildroot}%{_tmpfilesdir}/greenboot-status-motd.conf
 install -DpZm 0755 etc/greenboot/check/required.d/* %{buildroot}%{_sysconfdir}/%{name}/check/required.d
 install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 
 %post
 %systemd_post greenboot-healthcheck.service
+%systemd_post greenboot-loading-message.service
 %systemd_post greenboot-task-runner.service
 %systemd_post redboot-task-runner.service
 %systemd_post redboot.target
@@ -103,8 +114,12 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %post status
 %systemd_post greenboot-status.service
 
+%post update-platforms-check
+%systemd_post greenboot-loading-message.service
+
 %preun
 %systemd_preun greenboot-healthcheck.service
+%systemd_preun greenboot-loading-message.service
 %systemd_preun greenboot-task-runner.service
 %systemd_preun redboot-task-runner.service
 %systemd_preun redboot.target
@@ -119,8 +134,12 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %preun status
 %systemd_preun greenboot-status.service
 
+%preun update-platforms-check
+%systemd_preun greenboot-loading-message.service
+
 %postun
 %systemd_postun greenboot-healthcheck.service
+%systemd_postun greenboot-loading-message.service
 %systemd_postun greenboot-task-runner.service
 %systemd_postun redboot-task-runner.service
 %systemd_postun redboot.target
@@ -135,12 +154,17 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %postun status
 %systemd_postun greenboot-status.service
 
+%postun update-platforms-check
+%systemd_postun greenboot-loading-message.service
+
 %files
 %doc README.md
 %license LICENSE
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/%{name}
+%{_libexecdir}/%{name}/greenboot-loading-message
 %{_unitdir}/greenboot-healthcheck.service
+%{_unitdir}/greenboot-loading-message.service
 %{_unitdir}/greenboot-task-runner.service
 %{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
@@ -172,7 +196,18 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_libexecdir}/%{name}/redboot-auto-reboot
 %{_unitdir}/redboot-auto-reboot.service
 
+%files update-platforms-check
+%{_sysconfdir}/%{name}/check/required.d/01_repository_dns_check.sh
+%{_sysconfdir}/%{name}/check/wanted.d/01_update_platforms_check.sh
+%{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
+
 %changelog
+* Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1
+- Add ability to configure maximum number of boot attempts via env var and config file.
+- Add How does it work section to README.
+- Add CI via GitHub Actions and unit testing with BATS.
+- Add update platforms DNS resolutiona and connection checker as health checks out of the box
+
 * Thu Aug 13 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.11.0-1
 - Update to 0.11.0
 
