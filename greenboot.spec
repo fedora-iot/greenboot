@@ -1,5 +1,7 @@
+%global debug_package %{nil}
+
 Name:               greenboot
-Version:            0.11.0
+Version:            0.12.0
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -11,7 +13,7 @@ License:            LGPLv2+
 URL:                https://github.com/%{repo_owner}/%{repo_name}
 Source0:            https://github.com/%{repo_owner}/%{repo_name}/archive/%{repo_tag}.tar.gz
 
-BuildArch:          noarch
+ExcludeArch: s390x
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
@@ -203,10 +205,15 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 
 %changelog
 * Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1
+- Update to 0.12.0
 - Add ability to configure maximum number of boot attempts via env var and config file.
 - Add How does it work section to README.
 - Add CI via GitHub Actions and unit testing with BATS.
 - Add update platforms DNS resolutiona and connection checker as health checks out of the box
+
+* Sat Jan 16 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.11.0-2
+- Make arch specific due to grub availability on s390x
+- Resolves: rhbz#1915241
 
 * Thu Aug 13 2020 Christian Glombek <lorbus@fedoraproject.org> - 0.11.0-1
 - Update to 0.11.0
