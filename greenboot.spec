@@ -39,6 +39,8 @@ Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 %package default-health-checks
 Summary:            Series of optional and curated health checks
 Requires:           %{name} = %{version}-%{release}
+Requires:           util-linux
+Requires:           jq
 Provides:           greenboot-update-platforms-check
 Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 
@@ -157,6 +159,7 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
 %{_prefix}/lib/%{name}/check/wanted.d/01_update_platforms_check.sh
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
+%{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
 * Wed Nov 10 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.13.1-1
