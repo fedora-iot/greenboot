@@ -1,5 +1,5 @@
 FROM fedora
-RUN dnf install -y git findutils systemd grub2-tools-minimal
+RUN dnf install -y git findutils systemd grub2-tools-minimal util-linux
 
 RUN git clone https://github.com/bats-core/bats-core.git
 WORKDIR /bats-core

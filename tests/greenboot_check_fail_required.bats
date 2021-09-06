@@ -6,7 +6,7 @@ function setup() {
 
 @test "Test greenboot check with required scripts failing" {
     run $GREENBOOT_BIN_PATH check
-    [ "$status" -eq 1 ]
+    [ "$status" -ne 0 ]
 }
 
 function teardown() {

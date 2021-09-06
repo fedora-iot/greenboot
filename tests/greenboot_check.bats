@@ -1,6 +1,11 @@
 load common.bash
 
 function setup() {
+  # 02_watchdog.sh can't be checked within the container at the moment
+  # due to rpm-ostree, hence moving it out of the required directory
+  # for this test
+  mv $GREENBOOT_DEFAULT_CHECK_PATH/required.d/02_watchdog.sh /tmp/02_watchdog.sh
+ 
   # This checks that the /etc/greenboot/check path works as well 
   # as the /usr/lib/greenboot/check one
   mv $GREENBOOT_DEFAULT_CHECK_PATH/wanted.d/* $GREENBOOT_ETC_CHECK_PATH/wanted.d/
@@ -19,5 +24,6 @@ function setup() {
 }
 
 function teardown() {
+  mv /tmp/02_watchdog.sh $GREENBOOT_DEFAULT_CHECK_PATH/required.d/02_watchdog.sh
   mv $GREENBOOT_ETC_CHECK_PATH/wanted.d/* $GREENBOOT_DEFAULT_CHECK_PATH/wanted.d/
 }

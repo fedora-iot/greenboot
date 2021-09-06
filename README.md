@@ -6,7 +6,7 @@ Greenboot is very modular. It's comprised of several sub-packages, each of them 
 
 In order to get a full Greenboot installationon Fedora Silverblue, Fedora IoT or Fedora CoreOS:
 ```
-rpm-ostree install greenboot greenboot-status greenboot-rpm-ostree-grub2 greenboot-grub2 greenboot-reboot greenboot-update-platforms-check
+rpm-ostree install greenboot greenboot-status greenboot-rpm-ostree-grub2 greenboot-grub2 greenboot-reboot greenboot-update-platforms-check greenboot-watchdog-triggered-boot-check
 
 systemctl reboot
 ```
@@ -80,6 +80,9 @@ These health checks are available in `/usr/lib/greenboot/check`, a read-only dir
 The `greenboot-update-platforms-check` subpackage ships with the following checks:
 - **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 - **Check if update platforms are still reachable**: This script is under `/etc/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
+
+The `greenboot-watchdog-triggered-boot-check` subpackage ships with the following checks:
+- **Check if current boot has been triggered by hardware watchdog**: This script is under `/etc/greenboot/check/required.d/02_watchdog.sh` and checks whether current boot has been watchdog-triggered or not. If it is, but the reboot has occurred after a certain grace period (default of 24 hours, configurable adding `GREENBOOT_WATCHDOG_GRACE_PERIOD=number_of_hours` to `/etc/greenboot/greenboot.conf`), Greenboot won't mark the current boot as red and won't rollback to the previous deployment. If has occurred within the grace period, at the moment the current boot will be marked as red, but Greenboot won't rollback to the previous deployment.
 
 ### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.
