@@ -32,12 +32,9 @@ systemctl reboot
 
 ### Configuration
 At the moment, it is possible to customize the following parameters via environment variables. These environment variables can be described as well in the config file `/etc/greenboot/greenboot.conf`:
-- **GREENBOOT_MAX_BOOT_ATTEMPTS**. Maximum number of boot attempts.
-
-#### Sample `etc/greenboot/greenboot.conf` file
-``` bash
-GREENBOOT_MAX_BOOT_ATTEMPTS=2
-```
+- **GREENBOOT_MAX_BOOT_ATTEMPTS**: Maximum number of boot attempts before declaring the deployment as problematic and rolling back to the previous one.
+- **GREENBOOT_WATCHDOG_CHECK_ENABLED**: Enables/disables *Check if current boot has been triggered by hardware watchdog* health check. More info on [Health checks included with subpackage greenboot-default-health-checks](#health-checks-included-with-subpackage-greenboot\-default\-health\-checks) section.
+- **GREENBOOT_WATCHDOG_GRACE_PERIOD**: Number of hours after an upgrade that we consider the new deployment as culprit of reboot.
 
 ### Health checks with bash scripts
 
@@ -74,6 +71,7 @@ These health checks are available in `/usr/lib/greenboot/check`, a read-only dir
 
 - **Check if repositories URLs are still DNS solvable**: This script is under `/usr/lib/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 - **Check if update platforms are still reachable**: This script is under `/usr/lib/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
+- **Check if current boot has been triggered by hardware watchdog**: This script is under `/usr/lib/greenboot/check/required.d/02_watchdog.sh` and checks whether the current boot has been watchdog-triggered or not. If it is, but the reboot has occurred after a certain grace period (default of 24 hours, configurable via `GREENBOOT_WATCHDOG_GRACE_PERIOD=number_of_hours` in `/etc/greenboot/greenboot.conf`), Greenboot won't mark the current boot as red and won't rollback to the previous deployment. If has occurred within the grace period, at the moment the current boot will be marked as red, but Greenboot won't rollback to the previous deployment. It is enabled by default but it can be disabled by modifying `GREENBOOT_WATCHDOG_CHECK_ENABLED` in `/etc/greenboot/greenboot.conf` to `false`.
 
 ### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.
