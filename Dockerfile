@@ -6,7 +6,9 @@ WORKDIR /bats-core
 RUN ./install.sh /usr/local
 
 COPY ./usr/libexec/greenboot /usr/libexec/greenboot
-COPY ./etc/greenboot/check /etc/greenboot/check
+COPY ./usr/lib/greenboot/check /usr/lib/greenboot/check
+RUN mkdir -p /etc/greenboot/{green.d,red.d,check}
+RUN mkdir /etc/greenboot/check/{required.d,wanted.d}
 
 WORKDIR /testing
 COPY ./tests .

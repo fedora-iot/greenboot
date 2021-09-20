@@ -75,6 +75,8 @@ Directory structure:
 ```
 
 #### Health checks included with Greenboot
+These health checks are available in `/usr/lib/greenboot/check`, a read-only directory in rpm-ostree systems. If you find a bug in any of them or you have an improvement, please create a PR with such fix/feature and we'll review it and potentially include it.
+
 The `greenboot-update-platforms-check` subpackage ships with the following checks:
 - **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 - **Check if update platforms are still reachable**: This script is under `/etc/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.

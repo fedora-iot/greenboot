@@ -3,6 +3,8 @@ set -euo pipefail
 IFS=$'\n\t'
 LC_ALL=C
 
+SCRIPTS_PATHS=("/usr/lib/greenboot/check" "/etc/greenboot/check")
+
 script_runner () {
   local scripts_dir=$1; shift
   local mode=$1; shift
@@ -30,8 +32,10 @@ script_runner () {
 
 case "$1" in
   "check")
-    script_runner "/etc/greenboot/check/required.d" "strict" "Running Required Health Check Scripts..." || exit 1
-    script_runner "/etc/greenboot/check/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
+    for health_check_path in "${SCRIPTS_PATHS[@]}"; do
+      script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || exit 1
+      script_runner "$health_check_path/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
+    done
     ;;
   "green")
     echo "<5>Boot Status is GREEN - Health Check SUCCESS"
