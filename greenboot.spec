@@ -84,6 +84,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
 mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
+mkdir -p %{buildroot}%{_prefix}/lib/%{name}/check/required.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/green.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/red.d
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
 mkdir -p %{buildroot}%{_tmpfilesdir}
@@ -93,8 +97,8 @@ install -DpZm 0644 usr/lib/systemd/system/greenboot-healthcheck.service.d/10-net
 install -DpZm 0644 usr/lib/systemd/system/*.target %{buildroot}%{_unitdir}
 install -DpZm 0644 usr/lib/systemd/system/*.service %{buildroot}%{_unitdir}
 install -DpZm 0644 usr/lib/tmpfiles.d/greenboot-status-motd.conf %{buildroot}%{_tmpfilesdir}/greenboot-status-motd.conf
-install -DpZm 0755 etc/greenboot/check/required.d/* %{buildroot}%{_sysconfdir}/%{name}/check/required.d
-install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
+install -DpZm 0755 usr/lib/greenboot/check/required.d/* %{buildroot}%{_prefix}/lib/%{name}/check/required.d
+install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
 
 %post
 %systemd_post greenboot-healthcheck.service
@@ -170,14 +174,14 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/greenboot-task-runner.service
 %{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
-%dir %{_sysconfdir}/%{name}
-%dir %{_sysconfdir}/%{name}/check
-%dir %{_sysconfdir}/%{name}/check/required.d
-%{_sysconfdir}/%{name}/check/required.d/00_required_scripts_start.sh
-%dir %{_sysconfdir}/%{name}/check/wanted.d
-%{_sysconfdir}/%{name}/check/wanted.d/00_wanted_scripts_start.sh
-%dir %{_sysconfdir}/%{name}/green.d
-%dir %{_sysconfdir}/%{name}/red.d
+%dir %{_prefix}/lib/%{name}
+%dir %{_prefix}/lib/%{name}/check
+%dir %{_prefix}/lib/%{name}/check/required.d
+%{_prefix}/lib/%{name}/check/required.d/00_required_scripts_start.sh
+%dir %{_prefix}/lib/%{name}/check/wanted.d
+%{_prefix}/lib/%{name}/check/wanted.d/00_wanted_scripts_start.sh
+%dir %{_prefix}/lib/%{name}/green.d
+%dir %{_prefix}/lib/%{name}/red.d
 
 %files status
 %{_exec_prefix}/lib/motd.d/boot-status
@@ -199,8 +203,8 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_unitdir}/redboot-auto-reboot.service
 
 %files update-platforms-check
-%{_sysconfdir}/%{name}/check/required.d/01_repository_dns_check.sh
-%{_sysconfdir}/%{name}/check/wanted.d/01_update_platforms_check.sh
+%{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
+%{_prefix}/lib/%{name}/check/wanted.d/01_update_platforms_check.sh
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
 
 %changelog
