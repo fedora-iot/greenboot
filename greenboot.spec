@@ -182,6 +182,12 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_prefix}/lib/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 %dir %{_prefix}/lib/%{name}/green.d
 %dir %{_prefix}/lib/%{name}/red.d
+%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/%{name}/check
+%dir %{_sysconfdir}/%{name}/check/required.d
+%dir %{_sysconfdir}/%{name}/check/wanted.d
+%dir %{_sysconfdir}/%{name}/green.d
+%dir %{_sysconfdir}/%{name}/red.d
 
 %files status
 %{_exec_prefix}/lib/motd.d/boot-status
