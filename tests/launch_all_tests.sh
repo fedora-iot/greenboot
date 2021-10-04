@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bats *.bats
+bats *.bats --print-output-on-failure --jobs 1
