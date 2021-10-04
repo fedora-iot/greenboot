@@ -9,6 +9,7 @@ script_runner () {
   local scripts_dir=$1; shift
   local mode=$1; shift
   local start_msg=$1; shift
+  local required_hc_failed=false
   echo "$start_msg"
   for script in $(find "$scripts_dir" -name '*.sh' | sort); do
     local rc=0
@@ -21,13 +22,17 @@ script_runner () {
           echo "<2>$failure_msg. Continuing..." >&2
           ;;
         "strict")
-          echo "<0>$failure_msg" >&2
-          exit $rc
+          required_hc_failed=true
+          echo "<0>$failure_msg. Continuing..." >&2
       esac
     else
       echo "<6>Script '$(basename "$script")' SUCCESS"
     fi
   done
+
+  if [[ $required_hc_failed == true ]]; then
+    exit 1
+  fi
 }
 
 case "$1" in
