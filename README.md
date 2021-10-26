@@ -36,13 +36,9 @@ systemctl reboot
 ## Usage
 
 ### Configuration
-At the moment, it is possible to customize the following parameters via environment variables. These environment variables can be described as well in the config file `/etc/greenboot/greenboot.conf`:
-- **GREENBOOT_MAX_BOOT_ATTEMPTS**. Maximum number of boot attempts.
-
-#### Sample `etc/greenboot/greenboot.conf` file
-``` bash
-GREENBOOT_MAX_BOOT_ATTEMPTS=2
-```
+At the moment, it is possible to customize the following parameters via the config file `/etc/greenboot/greenboot.conf`. Some of these parameters can be configured as well via environment variables, and those will be explicitely called out in the following list:
+- **GREENBOOT_MONITOR_SERVICES**: List of systemd services that are essential to the device performance. If they're not active when the device boots, Greenboot will mark the boot as "red", scripts in `/etc/greenboot/red.d` will be executed and will reboot the device.
+- **GREENBOOT_MAX_BOOT_ATTEMPTS**. Maximum number of boot attempts. These parameter can be configured as well via an environment variable with the same name. Bear in mind that the configuration file value will take more precedence than the environment variable one.
 
 ### Health checks with bash scripts
 
@@ -78,6 +74,7 @@ Directory structure:
 The `greenboot-update-platforms-check` subpackage ships with the following checks:
 - **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
 - **Check if update platforms are still reachable**: This script is under `/etc/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
+- **Check if certain services are active at boot time**: This script is under `/etc/greenboot/check/required.d/02_update_platform_check.sh`. It makes sure that a user-defined array of services are active at boot time.
 
 ### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.

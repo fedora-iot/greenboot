@@ -202,6 +202,7 @@ install -DpZm 0755 etc/greenboot/check/wanted.d/* %{buildroot}%{_sysconfdir}/%{n
 %{_sysconfdir}/%{name}/check/required.d/01_repository_dns_check.sh
 %{_sysconfdir}/%{name}/check/wanted.d/01_update_platforms_check.sh
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
+%{_sysconfdir}/%{name}/check/required.d/02_check_services.sh
 
 %changelog
 * Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1

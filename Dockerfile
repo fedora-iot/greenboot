@@ -11,5 +11,6 @@ COPY ./etc/greenboot/check /etc/greenboot/check
 WORKDIR /testing
 COPY ./tests .
 COPY ./tests/testing_files/fedora_iot.conf /etc/ostree/remotes.d/fedora_iot.conf
+COPY ./tests/testing_files/greenboot.conf /etc/greenboot/greenboot.conf
 
 ENTRYPOINT [ "/bin/bash", "launch_all_tests.sh" ]

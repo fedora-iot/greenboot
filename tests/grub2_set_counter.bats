@@ -39,5 +39,5 @@ CONFIG_FILE_PATH=$GREENBOOT_ETC_ROOT_PATH/greenboot.conf
 function teardown() {
     $GRUB2_EDITENV - unset boot_counter
     $GRUB2_EDITENV - unset boot_success
-    rm -f $CONFIG_FILE_PATH
+    cp testing_files/greenboot.conf $CONFIG_FILE_PATH # This resets the original config file
 }

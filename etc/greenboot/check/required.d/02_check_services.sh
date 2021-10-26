@@ -4,7 +4,6 @@ check_if_config_file_exists() {
     GREENBOOT_CONFIGURATION_FILE=/etc/greenboot/greenboot.conf
     if test -f "$GREENBOOT_CONFIGURATION_FILE"; then
         source $GREENBOOT_CONFIGURATION_FILE
-        # SERVICES=( "${SERVICES[@]}" "${GREENBOOT_MONITOR_SERVICES[@]}" )
         SERVICES=( "${GREENBOOT_MONITOR_SERVICES[@]}" )
     else
         echo "ERROR: $GREENBOOT_CONFIGURATION_FILE doesn't exist"
