@@ -17,59 +17,31 @@ ExcludeArch: s390x
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
-
-%description
-%{summary}.
-
-%package auto-update-fallback
-Summary:            Automatic updates and failure fallback for rpm-ostree-based system 
-Requires:           %{name} = %{version}-%{release}
-Requires:           %{name}-reboot = %{version}-%{release}
-Requires:           %{name}-rpm-ostree-grub2 = %{version}-%{release}
-
-%description auto-update-fallback
-%{summary}.
-
-%package status
-Summary:            Message of the Day updater for greenboot
-Requires:           %{name} = %{version}-%{release}
+Requires:           grub2-tools-minimal
+Requires:           rpm-ostree
 # PAM is required to programatically read motd messages from /etc/motd.d/*
 Requires:           pam >= 1.3.1-15
 # While not strictly necessary to generate the motd, the main use-case of this package is to display it on SSH login
 Recommends:         openssh
+Provides:           greenboot-auto-update-fallback
+Obsoletes:          greenboot-auto-update-fallback <= 0.12.0
+Provides:           greenboot-grub2
+Obsoletes:          greenboot-grub2 <= 0.12.0
+Provides:           greenboot-reboot
+Obsoletes:          greenboot-reboot <= 0.12.0
+Provides:           greenboot-rpm-ostree-grub2
+Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 
-%description status
+%description
 %{summary}.
 
-%package rpm-ostree-grub2
-Summary:            Scripts for greenboot on rpm-ostree-based systems using the Grub2 bootloader
-Requires:           %{name} = %{version}-%{release}
-Requires:           %{name}-grub2 = %{version}-%{release}
-Requires:           rpm-ostree
-
-%description rpm-ostree-grub2
-%{summary}.
-
-%package grub2
-Summary:            Grub2 specific scripts for greenboot
-Requires:           %{name} = %{version}-%{release}
-Requires:           grub2-tools-minimal
-
-%description grub2
-%{summary}.
-
-%package reboot
-Summary:            Reboot on red status for greenboot
-Requires:           %{name} = %{version}-%{release}
-
-%description reboot
-%{summary}.
-
-%package update-platforms-check
+%package default-health-checks
 Summary:            Update platforms DNS resolution and connection check for greenboot
 Requires:           %{name} = %{version}-%{release}
+Provides:           update-platforms-check
+Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 
-%description update-platforms-check
+%description default-health-checks
 %{summary}.
 
 %prep
@@ -106,21 +78,13 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %systemd_post greenboot-task-runner.service
 %systemd_post redboot-task-runner.service
 %systemd_post redboot.target
-
-%post grub2
+%systemd_post greenboot-status.service
 %systemd_post greenboot-grub2-set-counter.service
 %systemd_post greenboot-grub2-set-success.service
-
-%post reboot
+%systemd_post greenboot-rpm-ostree-grub2-check-fallback.service
 %systemd_post redboot-auto-reboot.service
 
-%post rpm-ostree-grub2
-%systemd_post greenboot-rpm-ostree-grub2-check-fallback.service
-
-%post status
-%systemd_post greenboot-status.service
-
-%post update-platforms-check
+%post default-health-checks
 %systemd_post greenboot-loading-message.service
 
 %preun
@@ -129,18 +93,12 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %systemd_preun greenboot-task-runner.service
 %systemd_preun redboot-task-runner.service
 %systemd_preun redboot.target
-
-%preun grub2
+%systemd_preun greenboot-status.service
 %systemd_preun greenboot-grub2-set-counter.service
 %systemd_preun greenboot-grub2-set-success.service
-
-%preun rpm-ostree-grub2
 %systemd_preun greenboot-rpm-ostree-grub2-check-fallback.service
 
-%preun status
-%systemd_preun greenboot-status.service
-
-%preun update-platforms-check
+%preun default-health-checks
 %systemd_preun greenboot-loading-message.service
 
 %postun
@@ -149,18 +107,12 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %systemd_postun greenboot-task-runner.service
 %systemd_postun redboot-task-runner.service
 %systemd_postun redboot.target
-
-%postun grub2
+%systemd_postun greenboot-status.service
 %systemd_postun greenboot-grub2-set-counter.service
 %systemd_postun greenboot-grub2-set-success.service
-
-%postun rpm-ostree-grub2
 %systemd_postun greenboot-rpm-ostree-grub2-check-fallback.service
 
-%postun status
-%systemd_postun greenboot-status.service
-
-%postun update-platforms-check
+%postun default-health-checks
 %systemd_postun greenboot-loading-message.service
 
 %files
@@ -188,27 +140,19 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %dir %{_sysconfdir}/%{name}/check/wanted.d
 %dir %{_sysconfdir}/%{name}/green.d
 %dir %{_sysconfdir}/%{name}/red.d
-
-%files status
 %{_exec_prefix}/lib/motd.d/boot-status
 %{_libexecdir}/%{name}/greenboot-status
 %{_tmpfilesdir}/greenboot-status-motd.conf
 %{_unitdir}/greenboot-status.service
-
-%files rpm-ostree-grub2
-%{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback
-%{_unitdir}/greenboot-rpm-ostree-grub2-check-fallback.service
-
-%files grub2
 %{_libexecdir}/%{name}/greenboot-grub2-set-counter
 %{_unitdir}/greenboot-grub2-set-success.service
 %{_unitdir}/greenboot-grub2-set-counter.service
-
-%files reboot
+%{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback
+%{_unitdir}/greenboot-rpm-ostree-grub2-check-fallback.service
 %{_libexecdir}/%{name}/redboot-auto-reboot
 %{_unitdir}/redboot-auto-reboot.service
 
-%files update-platforms-check
+%files default-health-checks
 %{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
 %{_prefix}/lib/%{name}/check/wanted.d/01_update_platforms_check.sh
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
