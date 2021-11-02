@@ -20,7 +20,8 @@ Requires:           systemd >= 240
 Requires:           grub2-tools-minimal
 Requires:           rpm-ostree
 # PAM is required to programatically read motd messages from /etc/motd.d/*
-Requires:           pam >= 1.3.1-15
+# This causes issues with RHEL-8 as the fix isn't there an el8 is on pam-1.3.x
+Requires:           pam >= 1.4.0
 # While not strictly necessary to generate the motd, the main use-case of this package is to display it on SSH login
 Recommends:         openssh
 Provides:           greenboot-auto-update-fallback
@@ -38,7 +39,7 @@ Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 %package default-health-checks
 Summary:            Update platforms DNS resolution and connection check for greenboot
 Requires:           %{name} = %{version}-%{release}
-Provides:           update-platforms-check
+Provides:           greenboot-update-platforms-check
 Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 
 %description default-health-checks
