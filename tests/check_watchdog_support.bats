@@ -1,7 +1,7 @@
 load common.bash
 
 function setup() {
-    source $GREENBOOT_CHECK_PATH/required.d/02_watchdog.sh --source-only
+    source $GREENBOOT_DEFAULT_CHECK_PATH/required.d/02_watchdog.sh --source-only
 }
 
 @test "Ensure watchdog check is working" {

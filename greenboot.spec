@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.12.0
+Version:            0.12.1
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -37,21 +37,14 @@ Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 %{summary}.
 
 %package default-health-checks
-Summary:            Update platforms DNS resolution and connection check for greenboot
+Summary:            Series of optional and curated health checks
 Requires:           %{name} = %{version}-%{release}
+Requires:           util-linux
+Requires:           jq
 Provides:           greenboot-update-platforms-check
 Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 
 %description default-health-checks
-%{summary}.
-
-%package watchdog-triggered-boot-check
-Summary:            Watchdog-triggered boot check for greenboot
-Requires:           %{name} = %{version}-%{release}
-Requires:           util-linux
-Requires:           jq
-
-%description watchdog-triggered-boot-check
 %{summary}.
 
 %prep
@@ -166,9 +159,7 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
 %{_prefix}/lib/%{name}/check/wanted.d/01_update_platforms_check.sh
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
-
-%files watchdog-triggered-boot-check
-%{_sysconfdir}/%{name}/check/required.d/02_watchdog.sh
+%{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
 * Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1
