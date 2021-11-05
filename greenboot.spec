@@ -159,6 +159,13 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
 
 %changelog
+* Tue Nov 02 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.12.0-3
+- Bump pam min version to 1.4.0
+
+* Mon Nov 01 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-2
+- Reorganize subpackage structure to "bare" greenboot and greenboot-default-health-checks
+- Move default health checks to /usr/lib/greenboot/check
+
 * Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1
 - Update to 0.12.0
 - Add ability to configure maximum number of boot attempts via env var and config file.
