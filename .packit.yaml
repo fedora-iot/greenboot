@@ -3,6 +3,7 @@ synced_files:
   - greenboot.spec
   - .packit.yaml
 upstream_package_name: greenboot
+upstream_tag_template: v{version}
 downstream_package_name: greenboot
 jobs:
   - job: sync_from_downstream
