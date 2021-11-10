@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.12.0
+Version:            0.13.1
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -159,6 +159,9 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
 
 %changelog
+* Wed Nov 10 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.13.1-1
+- Update to 0.13.1
+
 * Mon Jul 26 2021 Jose Noguera <jnoguera@redhat.com> - 0.12.0-1
 - Update to 0.12.0
 - Add ability to configure maximum number of boot attempts via env var and config file.
