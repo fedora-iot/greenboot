@@ -2,21 +2,16 @@
 Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems
 
 ## Installation
-Greenboot is very modular. It's comprised of several sub-packages, each of them adding specific functionalities.
+Greenboot is comprised of two packages:
+- `greenboot` itself, with all core functionalities: check provided scripts, reboot if these checks don't pass, rollback to previous deployment if rebooting hasn't solved the problem, etc.
+- `greenboot-default-health-checks`, a series of optional and curated health checks provided by Greenboot maintainers.
 
 In order to get a full Greenboot installationon Fedora Silverblue, Fedora IoT or Fedora CoreOS:
 ```
-rpm-ostree install greenboot greenboot-status greenboot-rpm-ostree-grub2 greenboot-grub2 greenboot-reboot greenboot-update-platforms-check
+rpm-ostree install greenboot greenboot-default-health-checks
 
 systemctl reboot
 ```
-
-### Subpackages
-- **status:** Posts Greenboot status to MOTD.
-- **rpm-ostree-grub2:** Checks if current boot it's a fallback boot.
-- **grub2:** Sets GRUB2 environment variables that will be taken into account for determine the status of the boot.
-- **reboot:** Reboots the system in case Greenboot checks haven't passed.
-- **update-platforms-check:** Checks if the update platforms are still reachable and DNS resolvable.
 
 ## How does it work?
 - `greenboot-rpm-ostree-grub2-check-fallback.service` runs **before** `greenboot-healthcheck.service` and checks whether the GRUB2 environment variable `boot_counter` is -1. 
@@ -74,12 +69,11 @@ Directory structure:
     └── red.d
 ```
 
-#### Health checks included with Greenboot
+#### Health checks included with subpackage greenboot-default-health-checks
 These health checks are available in `/usr/lib/greenboot/check`, a read-only directory in rpm-ostree systems. If you find a bug in any of them or you have an improvement, please create a PR with such fix/feature and we'll review it and potentially include it.
 
-The `greenboot-update-platforms-check` subpackage ships with the following checks:
-- **Check if repositories URLs are still DNS solvable**: This script is under `/etc/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
-- **Check if update platforms are still reachable**: This script is under `/etc/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
+- **Check if repositories URLs are still DNS solvable**: This script is under `/usr/lib/greenboot/check/required.d/01_repository_dns_check.sh` and makes sure that DNS queries to repository URLs are still available.
+- **Check if update platforms are still reachable**: This script is under `/usr/lib/greenboot/check/wanted.d/01_update_platform_check.sh` and tries to connect and get a 2XX or 3XX HTTP code from the update platforms defined in `/etc/ostree/remotes.d`.
 
 ### Health Checks with systemd services
 Overall boot success is measured against `boot-complete.target`.
