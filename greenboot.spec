@@ -37,7 +37,7 @@ Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 %{summary}.
 
 %package default-health-checks
-Summary:            Update platforms DNS resolution and connection check for greenboot
+Summary:            Series of optional and curated health checks
 Requires:           %{name} = %{version}-%{release}
 Provides:           greenboot-update-platforms-check
 Obsoletes:          greenboot-update-platforms-check <= 0.12.0
@@ -167,7 +167,7 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 - Add ability to configure maximum number of boot attempts via env var and config file.
 - Add How does it work section to README.
 - Add CI via GitHub Actions and unit testing with BATS.
-- Add update platforms DNS resolutiona and connection checker as health checks out of the box
+- Add update platforms DNS resolution and connection checker as health checks out of the box
 
 * Sat Jan 16 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.11.0-2
 - Make arch specific due to grub availability on s390x
