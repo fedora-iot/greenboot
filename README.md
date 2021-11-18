@@ -1,47 +1,36 @@
 # greenboot
-Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems
+Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems.
+
+## Table of contents
+* [Installation](#installation)
+* [Usage](#usage)
+  + [Health checks with bash scripts](#health-checks-with-bash-scripts)
+    - [Health checks included with subpackage greenboot-default-health-checks](#health-checks-included-with-subpackage-greenboot\-default\-health\-checks)
+  + [Health Checks with systemd services](#health-checks-with-systemd-services)
+    - [Required Checks](#required-checks)
+    - [Wanted Checks](#wanted-checks)
+  + [Configuration](#configuration)
+* [How does it work](#how-does-it-work)
 
 ## Installation
 Greenboot is comprised of two packages:
 - `greenboot` itself, with all core functionalities: check provided scripts, reboot if these checks don't pass, rollback to previous deployment if rebooting hasn't solved the problem, etc.
 - `greenboot-default-health-checks`, a series of optional and curated health checks provided by Greenboot maintainers.
 
-In order to get a full Greenboot installationon Fedora Silverblue, Fedora IoT or Fedora CoreOS:
+In order to get a full Greenboot installation on Fedora Silverblue, Fedora IoT or Fedora CoreOS:
 ```
 rpm-ostree install greenboot greenboot-default-health-checks
 
 systemctl reboot
 ```
 
-## How does it work?
-- `greenboot-rpm-ostree-grub2-check-fallback.service` runs **before** `greenboot-healthcheck.service` and checks whether the GRUB2 environment variable `boot_counter` is -1. 
-  - If it is -1, this would mean that the system is in a fallback deployment and would execute `rpm-ostree rollback` to go back to the previous, working deployment. 
-  - If `boot_counter` is not -1, nothing is done in this step.
-- `greenboot-healthcheck.service` runs **before** systemd's [boot-complete.target](https://www.freedesktop.org/software/systemd/man/systemd.special.html#boot-complete.target). It launches `/usr/libexec/greenboot/greenboot check`, which runs the `required.d` and `wanted.d` scripts.
-  - If any script in the `required.d` folder fails, `redboot.target` is called.
-    - It triggers `redboot-task-runner.service`, which launches `/usr/libexec/greenboot/greenboot red`. This will run the scripts in `red.d` folder.
-    - After the above:
-      - `redboot-auto-reboot.service` is run. It performs a series of checks to determine if there's a requirement for manual intervention. If there's not, it reboots the system.
-  - If all scripts in `required.d` folder succeeded:
-    - `boot-complete.target` is reached.
-    - `greenboot-grub2-set-success.service` is run. It unsets `boot_counter` GRUB env var and sets `boot_success` GRUB env var to 1.
-    - `greenboot-task-runner.service` launches `/usr/libexec/greenboot/greenboot green`, which runs the scripts in `green.d` folder, scripts that are meant to be run after a successful update.
-    - `greenboot-status.service` is run, creating the MOTD with a success message.
-
 ## Usage
 
-### Configuration
-At the moment, it is possible to customize the following parameters via environment variables. These environment variables can be described as well in the config file `/etc/greenboot/greenboot.conf`:
-- **GREENBOOT_MAX_BOOT_ATTEMPTS**: Maximum number of boot attempts before declaring the deployment as problematic and rolling back to the previous one.
-- **GREENBOOT_WATCHDOG_CHECK_ENABLED**: Enables/disables *Check if current boot has been triggered by hardware watchdog* health check. More info on [Health checks included with subpackage greenboot-default-health-checks](#health-checks-included-with-subpackage-greenboot\-default\-health\-checks) section.
-- **GREENBOOT_WATCHDOG_GRACE_PERIOD**: Number of hours after an upgrade that we consider the new deployment as culprit of reboot.
-
 ### Health checks with bash scripts
-
-Place shell scripts representing *health checks* that **MUST NOT FAIL** in the `/etc/greenboot/check/required.d` directory. 
-Place shell scripts representing *health checks* that **MAY FAIL** in the `/etc/greenboot/check/wanted.d` directory.
-Place shell scripts you want to run *after* a boot has been declared **successful** in `/etc/greenboot/green.d`.
-Place shell scripts you want to run *after* a boot has been declared **failed** in `/etc/greenboot/red.d`.
+Place shell scripts representing *health checks* that **MUST NOT FAIL** in the `/etc/greenboot/check/required.d` directory. If any script in this folder exits with an error code, the boot will be declared as failed. Error message will appear in both MOTD and in `journalctl -u greenboot-healthcheck.service`.
+Place shell scripts representing *health checks* that **MAY FAIL** in the `/etc/greenboot/check/wanted.d` directory. Scripts in this folder can exit with an error code and the boot will not be declared as failed. Error message will appear in both MOTD and in `journalctl -u greenboot-healthcheck.service -b`.
+Place shell scripts you want to run *after* a boot has been declared **successful** (green) in `/etc/greenboot/green.d`.
+Place shell scripts you want to run *after* a boot has been declared **failed** (red) in `/etc/greenboot/red.d`.
 
 Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot-task-runner greenboot-healthcheck greenboot-status greenboot-loading-message`.
 It will automatically start during the next boot process and run its checks.
@@ -112,3 +101,25 @@ ExecStart=/usr/libexec/mytestsuite/wanted-check
 WantedBy=boot-complete.target
 WantedBy=multi-user.target
 ```
+
+### Configuration
+At the moment, it is possible to customize the following parameters via environment variables. These environment variables can be described as well in the config file `/etc/greenboot/greenboot.conf`:
+- **GREENBOOT_MAX_BOOT_ATTEMPTS**: Maximum number of boot attempts before declaring the deployment as problematic and rolling back to the previous one.
+- **GREENBOOT_WATCHDOG_CHECK_ENABLED**: Enables/disables *Check if current boot has been triggered by hardware watchdog* health check. More info on [Health checks included with subpackage greenboot-default-health-checks](#health-checks-included-with-subpackage-greenboot\-default\-health\-checks) section.
+- **GREENBOOT_WATCHDOG_GRACE_PERIOD**: Number of hours after an upgrade that we consider the new deployment as culprit of reboot.
+
+## How does it work
+- `greenboot-rpm-ostree-grub2-check-fallback.service` runs **before** `greenboot-healthcheck.service` and checks whether the GRUB2 environment variable `boot_counter` is -1. 
+  - If it is -1, this would mean that the system is in a fallback deployment and would execute `rpm-ostree rollback` to go back to the previous, working deployment. 
+  - If `boot_counter` is not -1, nothing is done in this step.
+- `greenboot-healthcheck.service` runs **before** systemd's [boot-complete.target](https://www.freedesktop.org/software/systemd/man/systemd.special.html#boot-complete.target). It launches `/usr/libexec/greenboot/greenboot check`, which runs the `required.d` and `wanted.d` scripts.
+  - If any script in the `required.d` folder fails, `redboot.target` is called.
+    - It triggers `redboot-task-runner.service`, which launches `/usr/libexec/greenboot/greenboot red`. This will run the scripts in `red.d` folder.
+    - After the above:
+      - `greenboot-status.service` is run, creating the MOTD specifying which scripts have failed.
+      - `redboot-auto-reboot.service` is run. It performs a series of checks to determine if there's a requirement for manual intervention. If there's not, it reboots the system.
+  - If all scripts in `required.d` folder succeeded:
+    - `boot-complete.target` is reached.
+    - `greenboot-grub2-set-success.service` is run. It unsets `boot_counter` GRUB env var and sets `boot_success` GRUB env var to 1.
+    - `greenboot-task-runner.service` launches `/usr/libexec/greenboot/greenboot green`, which runs the scripts in `green.d` folder, scripts that are meant to be run after a successful update.
+    - `greenboot-status.service` is run, creating the MOTD with a success message.
