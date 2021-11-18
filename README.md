@@ -11,6 +11,7 @@ Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github
     - [Wanted Checks](#wanted-checks)
   + [Configuration](#configuration)
 * [How does it work](#how-does-it-work)
+* [Development](#development)
 
 ## Installation
 Greenboot is comprised of two packages:
@@ -123,3 +124,6 @@ At the moment, it is possible to customize the following parameters via environm
     - `greenboot-grub2-set-success.service` is run. It unsets `boot_counter` GRUB env var and sets `boot_success` GRUB env var to 1.
     - `greenboot-task-runner.service` launches `/usr/libexec/greenboot/greenboot green`, which runs the scripts in `green.d` folder, scripts that are meant to be run after a successful update.
     - `greenboot-status.service` is run, creating the MOTD with a success message.
+
+## Development
+Please refer to [development/README.md](https://github.com/fedora-iot/greenboot/blob/main/development/README.md) file.
