@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.13.1
+Version:            0.14.0
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -162,6 +162,11 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Thu Nov 18 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.14.0-1
+- The 0.14.0 release
+- Add watchdog-triggered boot check
+- Ensure all required health checks are run
+
 * Wed Nov 10 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 0.13.1-1
 - Update to 0.13.1
 
