@@ -30,6 +30,8 @@ Provides:           greenboot-grub2
 Obsoletes:          greenboot-grub2 <= 0.12.0
 Provides:           greenboot-reboot
 Obsoletes:          greenboot-reboot <= 0.12.0
+Provides:           greenboot-status
+Obsoletes:          greenboot-status <= 0.12.0
 Provides:           greenboot-rpm-ostree-grub2
 Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 
