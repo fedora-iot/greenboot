@@ -76,6 +76,7 @@ install -DpZm 0644 usr/lib/systemd/system/*.service %{buildroot}%{_unitdir}
 install -DpZm 0644 usr/lib/tmpfiles.d/greenboot-status-motd.conf %{buildroot}%{_tmpfilesdir}/greenboot-status-motd.conf
 install -DpZm 0755 usr/lib/greenboot/check/required.d/* %{buildroot}%{_prefix}/lib/%{name}/check/required.d
 install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
+install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{name}/greenboot.conf
 
 %post
 %systemd_post greenboot-healthcheck.service
@@ -161,6 +162,7 @@ install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib
 %{_unitdir}/redboot-auto-reboot.service
 %{_libexecdir}/%{name}/greenboot-service-monitor
 %{_unitdir}/greenboot-service-monitor.service
+%{_sysconfdir}/%{name}/greenboot.conf
 
 %files default-health-checks
 %{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
