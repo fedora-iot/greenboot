@@ -19,4 +19,4 @@ RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot/greenboot-status
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=greenboot-success.target

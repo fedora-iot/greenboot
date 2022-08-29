@@ -90,6 +90,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %systemd_post greenboot-rpm-ostree-grub2-check-fallback.service
 %systemd_post redboot-auto-reboot.service
 %systemd_post greenboot-service-monitor.service
+%systemd_post greenboot-success.target
 
 %post default-health-checks
 %systemd_post greenboot-loading-message.service
@@ -105,6 +106,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %systemd_preun greenboot-grub2-set-success.service
 %systemd_preun greenboot-rpm-ostree-grub2-check-fallback.service
 %systemd_preun greenboot-service-monitor.service
+%systemd_preun greenboot-success.target
 
 %preun default-health-checks
 %systemd_preun greenboot-loading-message.service
@@ -120,6 +122,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %systemd_postun greenboot-grub2-set-success.service
 %systemd_postun greenboot-rpm-ostree-grub2-check-fallback.service
 %systemd_postun greenboot-service-monitor.service
+%systemd_postun greenboot-success.target
 
 %postun default-health-checks
 %systemd_postun greenboot-loading-message.service
@@ -133,6 +136,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_unitdir}/greenboot-healthcheck.service
 %{_unitdir}/greenboot-loading-message.service
 %{_unitdir}/greenboot-task-runner.service
+%{_unitdir}/greenboot-success.target
 %{_unitdir}/redboot-task-runner.service
 %{_unitdir}/redboot.target
 %dir %{_prefix}/lib/%{name}
