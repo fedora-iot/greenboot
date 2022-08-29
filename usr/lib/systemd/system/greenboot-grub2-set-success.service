@@ -11,6 +11,8 @@
 Description=Mark boot as successful in grubenv
 Requires=boot-complete.target
 After=boot-complete.target
+Conflicts=redboot.target
+DefaultDependencies=no
 
 [Service]
 Type=oneshot
