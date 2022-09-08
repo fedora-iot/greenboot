@@ -5,25 +5,25 @@ IFS=$'\n\t'
 status=""
 
 # healthcheck logs from current boot
-healthcheck_info="$(journalctl -u greenboot-healthcheck.service -p 2 -b -0 -o cat)"||""
+healthcheck_info="$(journalctl -u greenboot-healthcheck.service -p 2 -b -0 -o cat)" || true
 if [ -n "$healthcheck_info" ]; then
     status+="$healthcheck_info"$'\n'
 fi
 
 if [ "$(systemctl is-active boot-complete.target)" = "active" ]; then
     # greenboot logs (post healthchecks) from current boot
-    greenboot_runner_info="$(journalctl -u greenboot-task-runner.service -p 5 -b -0 -o cat)"||""
+    greenboot_runner_info="$(journalctl -u greenboot-task-runner.service -p 5 -b -0 -o cat)" || true
     if [ -n "$greenboot_runner_info" ]; then
         status+="$greenboot_runner_info"$'\n'
     fi
 else
     # redboot logs (post healthchecks) from current boot
-    redboot_runner_info="$(journalctl -u redboot-task-runner.service -p 0 -b -0 -o cat)"||""
+    redboot_runner_info="$(journalctl -u redboot-task-runner.service -p 0 -b -0 -o cat)" || true
     if [ -n "$redboot_runner_info" ]; then
         status+="$redboot_runner_info"$'\n'
     fi
     # redboot-auto-reboot.service logs (post redboot-task-runner.service) from current boot
-    redboot_reboot_info="$(journalctl -u redboot-auto-reboot.service -p 1 -b -0 -o cat)"||""
+    redboot_reboot_info="$(journalctl -u redboot-auto-reboot.service -p 1 -b -0 -o cat)" || true
     if [ -n "$redboot_reboot_info" ]; then
         status+="$redboot_reboot_info"$'\n'
     fi
@@ -35,7 +35,7 @@ fi
 
 # TODO: Show initial/max and current boot_counter values in status
 # If this is a fallback boot (i.e. the countdown has reached its end), show logs from previous boot
-fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback.service -b -0 -p 3 -o cat)"||""
+fallback_info="$(journalctl -u greenboot-rpm-ostree-grub2-check-fallback.service -b -0 -p 3 -o cat)" || true
 if [ -n "$fallback_info" ]; then
     status+="$fallback_info"$'\n'
 fi
