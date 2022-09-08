@@ -1,5 +1,5 @@
 name: Run CI tests
-on: 
+on:
   - push
   - pull_request
 jobs:
@@ -11,3 +11,14 @@ jobs:
         run: docker build . --file Dockerfile --tag test-image
       - name: Run tests
         run: docker run --rm --name test-greenboot -v /run/systemd/journal:/run/systemd/journal test-image
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Shellcheck
+        uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: -x
+        with:
+          ignore_paths: tests
