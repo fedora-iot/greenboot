@@ -44,6 +44,11 @@ if [[ ! -d $REPOS_DIRECTORY ]]; then
     exit 1
 fi
 
+if [ -z "$(ls -A $REPOS_DIRECTORY)" ]; then
+   echo "${REPOS_DIRECTORY} is empty, skipping check"
+   exit 0
+fi
+
 get_domain_names_from_platform_urls
 if [[ -n $DOMAIN_NAMES ]]; then
     get_dns_resolution_from_domain_names
