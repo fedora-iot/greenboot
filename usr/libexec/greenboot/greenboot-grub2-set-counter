@@ -3,6 +3,7 @@ set -eo pipefail
 
 GREENBOOT_CONFIGURATION_FILE=/etc/greenboot/greenboot.conf
 if test -f "$GREENBOOT_CONFIGURATION_FILE"; then
+    # shellcheck source=etc/greenboot/greenboot.conf
     source $GREENBOOT_CONFIGURATION_FILE
 fi
 
