@@ -13,7 +13,7 @@ get_update_platform_urls() {
 }
 
 assert_update_platforms_are_responding() {
-    for UPDATE_PLATFORM_URL in ${UPDATE_PLATFORM_URLS[*]}; do
+    for UPDATE_PLATFORM_URL in "${UPDATE_PLATFORM_URLS[@]}"; do
         HTTP_STATUS=$(curl -o /dev/null -Isw '%{http_code}\n' "$UPDATE_PLATFORM_URL" || echo "Unreachable")
         if ! [[ $HTTP_STATUS == 2* ]] && ! [[ $HTTP_STATUS == 3* ]]; then
             URLS_WITH_PROBLEMS+=( "$UPDATE_PLATFORM_URL" )
