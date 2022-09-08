@@ -5,7 +5,7 @@ set -euo pipefail
 # If booted into fallback deployment, clean up bootloader entries (rollback)
 if grub2-editenv list | grep -q "^boot_counter=-1$"; then
   # Logs from previous boot may be unavailable on systems without internal RTC; defaulting to empty string
-  prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)"||""
+  prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)" || true
   rpm-ostree rollback
   echo "<3>FALLBACK BOOT DETECTED! Default rpm-ostree deployment has been rolled back."
   if [ -n "$prev_logs" ]; then
