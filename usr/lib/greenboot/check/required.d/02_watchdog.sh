@@ -4,6 +4,7 @@ set -eo pipefail
 source_configuration_file() {
   GREENBOOT_CONFIGURATION_FILE=/etc/greenboot/greenboot.conf
   if test -f "$GREENBOOT_CONFIGURATION_FILE"; then
+    # shellcheck source=etc/greenboot/greenboot.conf
     source $GREENBOOT_CONFIGURATION_FILE
   fi
 }
@@ -49,7 +50,7 @@ if [ "${1}" != "--source-only" ]; then
     echo "Watchdog check is disabled"
     exit 0
   fi
-  
+
   set_grace_period
 
   SECONDS_IN_AN_HOUR=$((60 * 60))
