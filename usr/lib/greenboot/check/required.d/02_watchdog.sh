@@ -41,6 +41,11 @@ check_if_current_boot_is_wd_triggered() {
     fi
 }
 
+if ! check_if_there_is_a_watchdog ; then
+  echo "No watchdog on the system, skipping check"
+  exit 0
+fi
+
 # This is in order to test check_if_current_boot_is_wd_triggered
 # function within a container
 if [ "${1}" != "--source-only" ]; then
