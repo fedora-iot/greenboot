@@ -1,5 +1,5 @@
 #!/bin/bash
-set -o pipefail
+set -eo pipefail
 GREENBOOT_CONFIGURATION_FILE=/etc/greenboot/greenboot.conf
 service_started=true
 if test -f "$GREENBOOT_CONFIGURATION_FILE"; then
@@ -15,17 +15,17 @@ fi
 
 # check all the services listed
 for service in "${services[@]}"; do
-state="$(systemctl is-enabled $service)"
-if [[ $state == "enabled" ]]; then
+if [[ $(systemctl is-enabled $service) == "enabled" ]]; then
     rc="$(systemctl show -p ActiveState --value $service)"
     if [[ $rc != "active" ]]; then
         echo "<0>${service} is ${rc}"
         service_started=false
     fi
 else
-    echo "Skipped $state service: $service"
+    echo "Skipped service: $service"
 fi
 done
+
 # fail if any of the monitored services failed. This will make boot-complete.target fail.
 if ! $service_started ; then
     exit 1
