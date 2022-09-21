@@ -73,7 +73,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
             if !status.success() {
                 log::warn!("required script failed...");
                 failure = true;
-            }kkk
+            }
         }
     }
     // for path in [
@@ -100,6 +100,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         }
         log::warn!("<1>SYSTEM is UNHEALTHY. Rebooting...");
         Command::new("systemctl").arg("reboot").spawn()?;
+        return Ok(())
     }
     // TODO: run green checks...
     Command::new("grub2-editenv")
