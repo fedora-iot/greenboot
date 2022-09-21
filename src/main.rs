@@ -68,13 +68,11 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         "/usr/lib/greenboot/check/required.d/*.sh",
         "/etc/greenboot/check/required.d/*.sh",
     ] {
-        for entry in glob(path)? {
-            if let Ok(check) = entry {
-                let status = Command::new("bash").arg("-C").arg(check).status()?;
-                if !status.success() {
-                    log::warn!("required script failed...");
-                    failure = true;
-                }
+        for entry in glob(path)?.flatten() {
+            let status = Command::new("bash").arg("-C").arg(entry).status()?;
+            if !status.success() {
+                log::warn!("required script failed...");
+                failure = true;
             }
         }
     }
