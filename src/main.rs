@@ -83,7 +83,7 @@ fn parse_grub2_editenv_list() -> Result<HashMap<String, String>> {
     let split = stdout.split('\n').collect::<Vec<&str>>();
     let mut hm = HashMap::new();
     for s in split {
-        if s.len() == 0 {
+        if s.is_empty() {
             continue;
         }
         let ss = s.split('=').collect::<Vec<&str>>();
