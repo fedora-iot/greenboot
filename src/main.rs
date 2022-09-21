@@ -1,3 +1,5 @@
+use std::{collections::HashMap, process::Command};
+
 use anyhow::{Error, Result};
 use clap::{ArgEnum, Args, Parser, Subcommand};
 use nix::mount::{mount, MsFlags};
@@ -53,6 +55,17 @@ struct SetCounterArguments {}
 struct SuccessArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
+    let grub2_editenv_list = parse_grub2_editenv_list()?;
+    if let Some(v) = grub2_editenv_list.get("boot_counter") {
+        if v == "1" {
+            Command::new("rpm-ostree").arg("rollback").spawn()?;
+            Command::new("grub2-editenv")
+                .arg("-")
+                .arg("unset")
+                .arg("boot_counter")
+                .spawn()?;
+        }
+    }
     Ok(())
 }
 
@@ -62,6 +75,24 @@ fn set_counter(_args: &SetCounterArguments) -> Result<(), Error> {
 
 fn success(_args: &SuccessArguments) -> Result<(), Error> {
     Ok(())
+}
+
+fn parse_grub2_editenv_list() -> Result<HashMap<String, String>> {
+    let output = Command::new("grub2-editenv").arg("list").output()?;
+    let stdout = String::from_utf8(output.stdout)?;
+    let split = stdout.split('\n').collect::<Vec<&str>>();
+    let mut hm = HashMap::new();
+    for s in split {
+        if s.len() == 0 {
+            continue;
+        }
+        let ss = s.split('=').collect::<Vec<&str>>();
+        if ss.len() != 2 {
+            continue;
+        }
+        hm.insert(ss[0].to_string(), ss[1].to_string());
+    }
+    Ok(hm)
 }
 
 fn main() -> Result<()> {
