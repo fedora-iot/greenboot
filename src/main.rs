@@ -80,12 +80,10 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
     //     "/usr/lib/greenboot/check/wanted.d/*.sh",
     //     "/etc/greenboot/check/wanted.d/*.sh",
     // ] {
-    //     for entry in glob(path)? {
-    //         if let Ok(check) = entry {
-    //             let status = Command::new("bash").arg("-C").arg(check).status()?;
-    //             if !status.success() {
-    //                 log::warn!("wanted script failed...");
-    //             }
+    //     for entry in glob(path)?.flatten() {
+    //         let status = Command::new("bash").arg("-C").arg(entry).status()?;
+    //         if !status.success() {
+    //             log::warn!("wanted script failed...");
     //         }
     //     }
     // }
@@ -100,7 +98,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         }
         log::warn!("<1>SYSTEM is UNHEALTHY. Rebooting...");
         Command::new("systemctl").arg("reboot").spawn()?;
-        return Ok(())
+        return Ok(());
     }
     // TODO: run green checks...
     Command::new("grub2-editenv")
