@@ -1,7 +1,8 @@
 use std::{collections::HashMap, process::Command};
 
-use anyhow::{Error, Result};
+use anyhow::{bail, Error, Result};
 use clap::{ArgEnum, Args, Parser, Subcommand};
+use glob::glob;
 use nix::mount::{mount, MsFlags};
 
 #[derive(Parser)]
@@ -42,7 +43,6 @@ impl LogLevel {
 enum Commands {
     Check(CheckArguments),
     SetCounter(SetCounterArguments),
-    Success(SuccessArguments),
 }
 
 #[derive(Args)]
@@ -50,9 +50,6 @@ struct CheckArguments {}
 
 #[derive(Args)]
 struct SetCounterArguments {}
-
-#[derive(Args)]
-struct SuccessArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
     let grub2_editenv_list = parse_grub2_editenv_list()?;
@@ -66,14 +63,71 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
                 .spawn()?;
         }
     }
+    let mut failure = false;
+    for path in [
+        "/usr/lib/greenboot/check/required.d/*.sh",
+        "/etc/greenboot/check/required.d/*.sh",
+    ] {
+        for entry in glob(path)? {
+            if let Ok(check) = entry {
+                let status = Command::new("bash").arg("-C").arg(check).status()?;
+                if !status.success() {
+                    log::warn!("required script failed...");
+                    failure = true;
+                }
+            }
+        }
+    }
+    // for path in [
+    //     "/usr/lib/greenboot/check/wanted.d/*.sh",
+    //     "/etc/greenboot/check/wanted.d/*.sh",
+    // ] {
+    //     for entry in glob(path)? {
+    //         if let Ok(check) = entry {
+    //             let status = Command::new("bash").arg("-C").arg(check).status()?;
+    //             if !status.success() {
+    //                 log::warn!("wanted script failed...");
+    //             }
+    //         }
+    //     }
+    // }
+    if failure {
+        // TODO: run red checks...
+        log::warn!("required scripts failed, check logs, exiting...");
+        if !grub2_editenv_list.contains_key("boot_counter") {
+            bail!("<0>SYSTEM is UNHEALTHY, but boot_counter is unset in grubenv. Manual intervention necessary.");
+        }
+        if glob("/boot/loader/entries/*")?.count() == 1 {
+            bail!("<0>SYSTEM is UNHEALTHY, but bootlader entry count is 1. Manual intervention necessary.");
+        }
+        log::warn!("<1>SYSTEM is UNHEALTHY. Rebooting...");
+        Command::new("systemctl").arg("reboot").spawn()?;
+    }
+    // TODO: run green checks...
+    Command::new("grub2-editenv")
+        .arg("-")
+        .arg("set")
+        .arg("boot_success=1")
+        .spawn()?;
+    Command::new("grub2-editenv")
+        .arg("-")
+        .arg("unset")
+        .arg("boot_counter")
+        .spawn()?;
     Ok(())
 }
 
 fn set_counter(_args: &SetCounterArguments) -> Result<(), Error> {
-    Ok(())
-}
-
-fn success(_args: &SuccessArguments) -> Result<(), Error> {
+    Command::new("grub2-editenv")
+        .arg("-")
+        .arg("set")
+        .arg("boot_success=0")
+        .spawn()?;
+    Command::new("grub2-editenv")
+        .arg("-")
+        .arg("set")
+        .arg("boot_counter=1")
+        .spawn()?;
     Ok(())
 }
 
@@ -107,6 +161,5 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::Check(args) => check(&args),
         Commands::SetCounter(args) => set_counter(&args),
-        Commands::Success(args) => success(&args),
     }
 }
