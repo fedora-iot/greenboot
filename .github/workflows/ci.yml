@@ -19,7 +19,7 @@ jobs:
           check_filenames: true
           check_hidden: true
           ignore_words_file: .github/spellcheck-ignore
-          skip: "./docs/Gemfile.lock,./docs/_config.yml,./.github,./.git,./greenboot.spec"
+          skip: "./docs/Gemfile.lock,./docs/_config.yml,./.github,./.git,./greenboot.spec,./dist"
 
   fmt:
     name: Rustfmt
@@ -53,9 +53,9 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
-      # - name: Install deps
-      #   run: |
-      #     dnf install -y make gcc openssl openssl-devel findutils golang git tpm2-tss-devel clippy cargo rust clevis cryptsetup-devel clang-devel
+      - name: Install deps
+        run: |
+          dnf install -y make gcc git lippy cargo rust
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
@@ -65,9 +65,9 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:latest
     steps:
-      # - name: Install deps
-      #   run: |
-      #     dnf install -y make gcc openssl openssl-devel findutils golang git tpm2-tss-devel swtpm swtpm-tools cargo rust git clevis clevis-luks cryptsetup cryptsetup-devel clang-devel
+      - name: Install deps
+        run: |
+          dnf install -y make gcc git cargo rust git clevis
       - uses: actions/checkout@v3
         with:
           persist-credentials: false

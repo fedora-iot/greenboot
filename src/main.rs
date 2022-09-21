@@ -39,20 +39,17 @@ impl LogLevel {
 enum Commands {
     Check(CheckArguments),
     SetCounter(SetCounterArguments),
-    Success(SuccessArguments)
+    Success(SuccessArguments),
 }
 
 #[derive(Args)]
-struct CheckArguments {
-}
+struct CheckArguments {}
 
 #[derive(Args)]
-struct SetCounterArguments {
-}
+struct SetCounterArguments {}
 
 #[derive(Args)]
-struct SuccessArguments {
-}
+struct SuccessArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
     Ok(())
@@ -76,6 +73,6 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::Check(args) => check(&args),
         Commands::SetCounter(args) => set_counter(&args),
-        Commands::Success(args) => success(&args)
+        Commands::Success(args) => success(&args),
     }
 }
