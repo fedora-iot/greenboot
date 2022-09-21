@@ -118,6 +118,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
 }
 
 fn set_counter(_args: &SetCounterArguments) -> Result<(), Error> {
+    // all commands for grub2/systemctl need an abstraction to mock them in testing...
     Command::new("grub2-editenv")
         .arg("-")
         .arg("set")
