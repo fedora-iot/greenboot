@@ -73,7 +73,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
             if !status.success() {
                 log::warn!("required script failed...");
                 failure = true;
-            }
+            }kkk
         }
     }
     // for path in [
