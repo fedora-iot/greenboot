@@ -55,7 +55,7 @@ jobs:
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
       - name: Install deps
         run: |
-          dnf install -y make gcc git lippy cargo rust
+          dnf install -y make gcc git clippy cargo rust
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
