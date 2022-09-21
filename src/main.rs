@@ -57,7 +57,7 @@ struct SuccessArguments {}
 fn check(_args: &CheckArguments) -> Result<(), Error> {
     let grub2_editenv_list = parse_grub2_editenv_list()?;
     if let Some(v) = grub2_editenv_list.get("boot_counter") {
-        if v == "1" {
+        if v == "-1" {
             Command::new("rpm-ostree").arg("rollback").spawn()?;
             Command::new("grub2-editenv")
                 .arg("-")
