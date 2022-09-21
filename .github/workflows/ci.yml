@@ -19,7 +19,7 @@ jobs:
           check_filenames: true
           check_hidden: true
           ignore_words_file: .github/spellcheck-ignore
-          skip: "./docs/Gemfile.lock,./docs/_config.yml,./.github,./.git"
+          skip: "./docs/Gemfile.lock,./docs/_config.yml,./.github,./.git,./greenboot.spec"
 
   fmt:
     name: Rustfmt
