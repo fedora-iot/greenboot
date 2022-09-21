@@ -1,0 +1,70 @@
+on:
+  push:
+    branches:
+    - main
+    - "*.*.x"
+    tags:
+    - v*
+  schedule:
+    - cron: '0 0 * * *'
+
+name: Continuous Delivery
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: continuous_delivery
+    env:
+      quay_org: fido-fdo
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Perform container builds
+      id: build
+      uses: ./.github/actions/build_containers
+
+    - name: Push admin-cli to quay.io
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        registry: "quay.io/${{ env.quay_org }}"
+        image: admin-cli
+        tags: ${{ steps.build.outputs.tags }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+    - name: Push manufacturing-server to quay.io
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        registry: "quay.io/${{ env.quay_org }}"
+        image: manufacturing-server
+        tags: ${{ steps.build.outputs.tags }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+    - name: Push rendezvous-server to quay.io
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        registry: "quay.io/${{ env.quay_org }}"
+        image: rendezvous-server
+        tags: ${{ steps.build.outputs.tags }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+    - name: Push serviceinfo-api-server to quay.io
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        registry: "quay.io/${{ env.quay_org }}"
+        image: serviceinfo-api-server
+        tags: ${{ steps.build.outputs.tags }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+    - name: Push owner-onboarding-server to quay.io
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        registry: "quay.io/${{ env.quay_org }}"
+        image: owner-onboarding-server
+        tags: ${{ steps.build.outputs.tags }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}

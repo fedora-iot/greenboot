@@ -1,0 +1,141 @@
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+name: Continuous integration
+
+jobs:
+  check-spelling:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check spelling
+        uses: codespell-project/actions-codespell@master
+        with:
+          builtin: clear,rare,usage,code,en-GB_to_en-US
+          check_filenames: true
+          check_hidden: true
+          ignore_words_file: .github/spellcheck-ignore
+          skip: "./docs/Gemfile.lock,./docs/_config.yml,./.github,./.git"
+
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+      # - name: Install deps
+      #   run: |
+      #     dnf install -y make gcc openssl openssl-devel findutils golang git tpm2-tss-devel clippy cargo rust clevis cryptsetup-devel clang-devel
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings -D clippy::panic -D clippy::todo
+
+  build_and_test:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      # - name: Install deps
+      #   run: |
+      #     dnf install -y make gcc openssl openssl-devel findutils golang git tpm2-tss-devel swtpm swtpm-tools cargo rust git clevis clevis-luks cryptsetup cryptsetup-devel clang-devel
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Fix git trust
+        run: git config --global --add safe.directory /__w/greenboot-rs/greenboot-rs
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+      # This is primarily to ensure that changes to fdo_data.h are committed,
+      # which is critical for determining whether any stability changes were made
+      # during the PR review.
+      - name: Ensure building did not change any code
+        run: |
+          git diff --exit-code
+
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'latest'
+      - name: Install commitlint dependencies
+        run: npm install commitlint
+      - uses: wagoid/commitlint-github-action@v4
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
+        with:
+          configFile: .github/commitlint.config.js
+          failOnWarnings: true
+
+  # manpages:
+  #   name: Test man page generation
+  #   runs-on: ubuntu-latest
+  #   container: fedora:latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: install deps
+  #       run: |
+  #         dnf install -y make python3-docutils
+  #     - name: generate man pages
+  #       run: make man
+
+  # devcontainer_test:
+  #   name: Test Devcontainer Creation
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Install devcontainer CLI
+  #       run: npm install -g @vscode/dev-container-cli
+  #     - name: Build devcontainer
+  #       run: devcontainer build --image-name devcontainer-fdo-rs .
+  #     - name: Test building in devcontainer
+  #       run: docker run --rm -v `pwd`:/code:z --workdir /code --user root devcontainer-fdo-rs cargo build --verbose

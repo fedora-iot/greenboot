@@ -9,6 +9,7 @@ Before=shutdown.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot check
+MountFlags=slave
 
 [Install]
 RequiredBy=boot-complete.target
