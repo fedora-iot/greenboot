@@ -1,5 +1,6 @@
 use anyhow::{Error, Result};
 use clap::{ArgEnum, Args, Parser, Subcommand};
+use nix::mount::{mount, MsFlags};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -69,6 +70,8 @@ fn main() -> Result<()> {
     pretty_env_logger::formatted_builder()
         .filter_level(cli.log_level.to_log())
         .init();
+
+    mount::<str, str, str, str>(None, "/boot", None, MsFlags::MS_REMOUNT, None)?;
 
     match cli.command {
         Commands::Check(args) => check(&args),
