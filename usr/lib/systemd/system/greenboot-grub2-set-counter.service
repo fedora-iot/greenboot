@@ -12,6 +12,7 @@ Description=Set grub2 boot counter in preparation of upgrade
 DefaultDependencies=no
 Before=ostree-finalize-staged.service
 Conflicts=greenboot-grub2-set-success.service
+RequiresMountsFor=/boot
 
 [Service]
 Type=oneshot
