@@ -1,19 +1,35 @@
 %global debug_package %{nil}
+%bcond_without check
+%global __cargo_skip_build 0
+%global __cargo_is_lib() false
+%global forgeurl https://github.com/runcom/greenboot
+
+Version:            0.99.0
+
+%forgemeta
 
 Name:               greenboot
-Version:            0.15.2
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 
-%global repo_owner  fedora-iot
-%global repo_name   %{name}
-%global repo_tag    v%{version}
+URL:            %{forgeurl}
+Source:         %{forgesource}
+%if 0%{?rhel} && !0%{?eln}
+%if "%{?commit}" != ""
+Source1:        %{name}-%{commit}-vendor.tar.gz
+%else
+Source1:        %{name}-%{version}-vendor.tar.gz
+%endif
+%endif
 
-URL:                https://github.com/%{repo_owner}/%{repo_name}
-Source0:            https://github.com/%{repo_owner}/%{repo_name}/archive/%{repo_tag}.tar.gz
+ExcludeArch:    s390x i686 %{power64}
 
-ExcludeArch: s390x
+%if 0%{?rhel} && !0%{?eln}
+BuildRequires:  rust-toolset
+%else
+BuildRequires:  rust-packaging
+%endif
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
@@ -50,33 +66,14 @@ Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 %{summary}.
 
 %prep
-%setup -q
+%forgesetup
+%cargo_prep -V 1
 
 %build
 
 %install
-mkdir -p %{buildroot}%{_exec_prefix}/lib/motd.d/
-mkdir -p %{buildroot}%{_libexecdir}/%{name}
-mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
-mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
-mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
-mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
-mkdir -p %{buildroot}%{_prefix}/lib/%{name}/check/required.d
-mkdir    %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
-mkdir    %{buildroot}%{_prefix}/lib/%{name}/green.d
-mkdir    %{buildroot}%{_prefix}/lib/%{name}/red.d
-mkdir -p %{buildroot}%{_unitdir}
-mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
-mkdir -p %{buildroot}%{_tmpfilesdir}
-install -DpZm 0755 usr/libexec/greenboot/* %{buildroot}%{_libexecdir}/%{name}
-install -DpZm 0644 usr/lib/motd.d/boot-status %{buildroot}%{_exec_prefix}/lib/motd.d/boot-status
-install -DpZm 0644 usr/lib/systemd/system/greenboot-healthcheck.service.d/10-network-online.conf %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
-install -DpZm 0644 usr/lib/systemd/system/*.target %{buildroot}%{_unitdir}
-install -DpZm 0644 usr/lib/systemd/system/*.service %{buildroot}%{_unitdir}
-install -DpZm 0644 usr/lib/tmpfiles.d/greenboot-status-motd.conf %{buildroot}%{_tmpfilesdir}/greenboot-status-motd.conf
-install -DpZm 0755 usr/lib/greenboot/check/required.d/* %{buildroot}%{_prefix}/lib/%{name}/check/required.d
-install -DpZm 0755 usr/lib/greenboot/check/wanted.d/* %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
-install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{name}/greenboot.conf
+%make_install RELEASE=1
+# install scripts/systemd/stuff
 
 %post
 %systemd_post greenboot-healthcheck.service
