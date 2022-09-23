@@ -1,4 +1,4 @@
-use std::{collections::HashMap, process::Command};
+use std::{collections::HashMap, io::Write, os::unix::prelude::AsRawFd, process::Command};
 
 use anyhow::{bail, Error, Result};
 use clap::{ArgEnum, Args, Parser, Subcommand};
@@ -52,6 +52,9 @@ struct CheckArguments {}
 struct SetCounterArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
+    // TODO: logic for watchdog
+    log::info!("watchdog boot status: {}", check_wd_boot_status()?);
+
     let grub2_editenv_list = parse_grub2_editenv_list()?;
     if let Some(v) = grub2_editenv_list.get("boot_counter") {
         if v == "-1" {
@@ -97,7 +100,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
             bail!("<0>SYSTEM is UNHEALTHY, but bootlader entry count is 1. Manual intervention necessary.");
         }
         log::warn!("<1>SYSTEM is UNHEALTHY. Rebooting...");
-        Command::new("systemctl").arg("reboot").spawn()?;
+        reboot()?;
         return Ok(());
     }
     // TODO: run green checks...
@@ -114,7 +117,35 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
     Ok(())
 }
 
-fn set_counter(_args: &SetCounterArguments) -> Result<(), Error> {
+fn reboot() -> Result<(), Error> {
+    Command::new("systemctl").arg("reboot").spawn()?;
+    Ok(())
+}
+
+const WATCHDOG_IOCTL_BASE: u8 = b'W';
+const WDIOC_TYPE_MODE: u8 = 2;
+nix::ioctl_read!(wd_getbootstatus, WATCHDOG_IOCTL_BASE, WDIOC_TYPE_MODE, i32);
+
+fn from_nix_result<T>(res: ::nix::Result<T>) -> std::io::Result<T> {
+    match res {
+        Ok(r) => Ok(r),
+        Err(err) => Err(err.into()),
+    }
+}
+
+fn check_wd_boot_status() -> Result<i32, Error> {
+    let mut devfile = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(false)
+        .open("/dev/watchdog")?;
+    let mut boot_status: i32 = 0;
+    from_nix_result(unsafe { wd_getbootstatus(devfile.as_raw_fd(), &mut boot_status) })?;
+    devfile.write("V".as_bytes())?;
+    Ok(boot_status)
+}
+
+fn set_counter(_args: &SetCounterArguments) -> Result<()> {
     // all commands for grub2/systemctl need an abstraction to mock them in testing...
     Command::new("grub2-editenv")
         .arg("-")
