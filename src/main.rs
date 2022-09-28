@@ -53,7 +53,9 @@ struct SetCounterArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
     // TODO: logic for watchdog
-    log::info!("watchdog boot status: {}", check_wd_boot_status()?);
+    if is_boot_wd_triggered()? {
+        // do something for wd triggered boot
+    }
 
     let grub2_editenv_list = parse_grub2_editenv_list()?;
     if let Some(v) = grub2_editenv_list.get("boot_counter") {
@@ -133,16 +135,20 @@ fn from_nix_result<T>(res: ::nix::Result<T>) -> std::io::Result<T> {
     }
 }
 
-fn check_wd_boot_status() -> Result<i32, Error> {
-    let mut devfile = std::fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(false)
-        .open("/dev/watchdog")?;
+fn is_boot_wd_triggered() -> Result<bool, Error> {
+    let mut devfile = std::fs::OpenOptions::new();
+    devfile.read(true).write(true).create(false);
+    let mut wd = match devfile.open("/dev/watchdog") {
+        Ok(file) => file,
+        Err(_) => {
+            log::warn!("no watchdog");
+            return Ok(false);
+        }
+    };
     let mut boot_status: i32 = 0;
-    from_nix_result(unsafe { wd_getbootstatus(devfile.as_raw_fd(), &mut boot_status) })?;
-    devfile.write("V".as_bytes())?;
-    Ok(boot_status)
+    from_nix_result(unsafe { wd_getbootstatus(wd.as_raw_fd(), &mut boot_status) })?;
+    wd.write("V".as_bytes())?;
+    Ok(boot_status == 1)
 }
 
 fn set_counter(_args: &SetCounterArguments) -> Result<()> {
