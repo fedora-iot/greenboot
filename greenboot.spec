@@ -1,8 +1,10 @@
 %global debug_package %{nil}
 %bcond_without check
+%global with_bundled 1
+%global with_packit 1
 %global __cargo_skip_build 0
 %global __cargo_is_lib() false
-%global forgeurl https://github.com/runcom/greenboot
+%global forgeurl https://github.com/fedora-iot/greenboot
 
 Version:            0.99.0
 
@@ -15,7 +17,7 @@ License:            LGPLv2+
 
 URL:            %{forgeurl}
 Source:         %{forgesource}
-%if 0%{?rhel} && !0%{?eln}
+%if ! 0%{?with_packit}
 %if "%{?commit}" != ""
 Source1:        %{name}-%{commit}-vendor.tar.gz
 %else
@@ -50,94 +52,172 @@ Provides:           greenboot-status
 Obsoletes:          greenboot-status <= 0.12.0
 Provides:           greenboot-rpm-ostree-grub2
 Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
+# List of bundled crate in vendor tarball, generated with:
+# cargo metadata --locked --format-version 1 | CRATE_NAME="greenboot" ../bundled-provides.jq
+Provides: bundled(crate(ahash)) = 0.7.6
+Provides: bundled(crate(aho-corasick)) = 0.7.19
+Provides: bundled(crate(anyhow)) = 1.0.65
+Provides: bundled(crate(async-trait)) = 0.1.57
+Provides: bundled(crate(atty)) = 0.2.14
+Provides: bundled(crate(autocfg)) = 1.1.0
+Provides: bundled(crate(base64)) = 0.13.0
+Provides: bundled(crate(bitflags)) = 1.3.2
+Provides: bundled(crate(block-buffer)) = 0.10.3
+Provides: bundled(crate(cfg-if)) = 1.0.0
+Provides: bundled(crate(clap)) = 4.0.4
+Provides: bundled(crate(clap_derive)) = 4.0.1
+Provides: bundled(crate(clap_lex)) = 0.3.0
+Provides: bundled(crate(config)) = 0.13.2
+Provides: bundled(crate(cpufeatures)) = 0.2.5
+Provides: bundled(crate(crypto-common)) = 0.1.6
+Provides: bundled(crate(digest)) = 0.10.5
+Provides: bundled(crate(dlv-list)) = 0.3.0
+Provides: bundled(crate(env_logger)) = 0.7.1
+Provides: bundled(crate(generic-array)) = 0.14.6
+Provides: bundled(crate(getrandom)) = 0.2.7
+Provides: bundled(crate(glob)) = 0.3.0
+Provides: bundled(crate(hashbrown)) = 0.12.3
+Provides: bundled(crate(heck)) = 0.4.0
+Provides: bundled(crate(hermit-abi)) = 0.1.19
+Provides: bundled(crate(humantime)) = 1.3.0
+Provides: bundled(crate(itoa)) = 1.0.3
+Provides: bundled(crate(json5)) = 0.4.1
+Provides: bundled(crate(lazy_static)) = 1.4.0
+Provides: bundled(crate(libc)) = 0.2.133
+Provides: bundled(crate(linked-hash-map)) = 0.5.6
+Provides: bundled(crate(log)) = 0.4.17
+Provides: bundled(crate(memchr)) = 2.5.0
+Provides: bundled(crate(memoffset)) = 0.6.5
+Provides: bundled(crate(minimal-lexical)) = 0.2.1
+Provides: bundled(crate(nix)) = 0.25.0
+Provides: bundled(crate(nom)) = 7.1.1
+Provides: bundled(crate(once_cell)) = 1.15.0
+Provides: bundled(crate(ordered-multimap)) = 0.4.3
+Provides: bundled(crate(os_str_bytes)) = 6.3.0
+Provides: bundled(crate(pathdiff)) = 0.2.1
+Provides: bundled(crate(pest)) = 2.3.1
+Provides: bundled(crate(pest_derive)) = 2.3.1
+Provides: bundled(crate(pest_generator)) = 2.3.1
+Provides: bundled(crate(pest_meta)) = 2.3.1
+Provides: bundled(crate(pin-utils)) = 0.1.0
+Provides: bundled(crate(pretty_env_logger)) = 0.4.0
+Provides: bundled(crate(proc-macro-error)) = 1.0.4
+Provides: bundled(crate(proc-macro-error-attr)) = 1.0.4
+Provides: bundled(crate(proc-macro2)) = 1.0.43
+Provides: bundled(crate(quick-error)) = 1.2.3
+Provides: bundled(crate(quote)) = 1.0.21
+Provides: bundled(crate(regex)) = 1.6.0
+Provides: bundled(crate(regex-syntax)) = 0.6.27
+Provides: bundled(crate(ron)) = 0.7.1
+Provides: bundled(crate(rust-ini)) = 0.18.0
+Provides: bundled(crate(ryu)) = 1.0.11
+Provides: bundled(crate(serde)) = 1.0.144
+Provides: bundled(crate(serde_derive)) = 1.0.144
+Provides: bundled(crate(serde_json)) = 1.0.85
+Provides: bundled(crate(sha1)) = 0.10.5
+Provides: bundled(crate(strsim)) = 0.10.0
+Provides: bundled(crate(syn)) = 1.0.100
+Provides: bundled(crate(termcolor)) = 1.1.3
+Provides: bundled(crate(thiserror)) = 1.0.35
+Provides: bundled(crate(thiserror-impl)) = 1.0.35
+Provides: bundled(crate(toml)) = 0.5.9
+Provides: bundled(crate(typenum)) = 1.15.0
+Provides: bundled(crate(ucd-trie)) = 0.1.5
+Provides: bundled(crate(unicode-ident)) = 1.0.4
+Provides: bundled(crate(version_check)) = 0.9.4
+Provides: bundled(crate(wasi)) = 0.11.0+wasi_snapshot_preview1
+Provides: bundled(crate(winapi)) = 0.3.9
+Provides: bundled(crate(winapi-i686-pc-windows-gnu)) = 0.4.0
+Provides: bundled(crate(winapi-util)) = 0.1.5
+Provides: bundled(crate(winapi-x86_64-pc-windows-gnu)) = 0.4.0
+Provides: bundled(crate(yaml-rust)) = 0.4.5
 
 %description
 %{summary}.
 
-%package default-health-checks
-Summary:            Series of optional and curated health checks
-Requires:           %{name} = %{version}-%{release}
-Requires:           util-linux
-Requires:           jq
-Provides:           greenboot-update-platforms-check
-Obsoletes:          greenboot-update-platforms-check <= 0.12.0
-
-%description default-health-checks
-%{summary}.
-
 %prep
-%forgesetup
-%cargo_prep -V 1
+%forgeautosetup
+%if ! 0%{?with_packit}
+tar xvf %{SOURCE1}
+%endif
+%if ! 0%{?with_bundled}
+%cargo_prep
+%else
+mkdir -p .cargo
+cat >.cargo/config << EOF
+[build]
+rustc = "%{__rustc}"
+rustdoc = "%{__rustdoc}"
+rustflags = %{__global_rustflags_toml}
+ 
+[install]
+root = "%{buildroot}%{_prefix}"
+ 
+[term]
+verbose = true
+ 
+[source.crates-io]
+replace-with = "vendored-sources"
+ 
+[source.vendored-sources]
+directory = "vendor"
+EOF
+%endif
+
+%if ! 0%{?with_bundled}
+%generate_buildrequires
+%cargo_generate_buildrequires
+%endif
 
 %build
+%cargo_build
 
 %install
-%make_install RELEASE=1
-# install scripts/systemd/stuff
+%cargo_install
+# `greenboot` should not be executed directly by users, so we move the binary
+mkdir -p %{buildroot}%{_libexecdir}
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+mv %{buildroot}%{_bindir}/greenboot %{buildroot}%{_libexecdir}/%{name}/%{name}
+install -Dpm0644 -t %{buildroot}%{_unitdir} \
+  dist/systemd/system/*.service
+# add config
+mkdir -p %{buildroot}%{_exec_prefix}/lib/motd.d/
+mkdir -p %{buildroot}%{_libexecdir}/%{name}
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}/check/required.d
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/check/wanted.d
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/green.d
+mkdir    %{buildroot}%{_sysconfdir}/%{name}/red.d
+mkdir -p %{buildroot}%{_prefix}/lib/%{name}/check/required.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/green.d
+mkdir    %{buildroot}%{_prefix}/lib/%{name}/red.d
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
+mkdir -p %{buildroot}%{_tmpfilesdir}
 
 %post
-%systemd_post greenboot-healthcheck.service
-%systemd_post greenboot-loading-message.service
-%systemd_post greenboot-task-runner.service
-%systemd_post redboot-task-runner.service
-%systemd_post redboot.target
-%systemd_post greenboot-status.service
+%systemd_post greenboot.service
 %systemd_post greenboot-grub2-set-counter.service
-%systemd_post greenboot-grub2-set-success.service
-%systemd_post greenboot-rpm-ostree-grub2-check-fallback.service
-%systemd_post redboot-auto-reboot.service
-%systemd_post greenboot-service-monitor.service
-
-%post default-health-checks
-%systemd_post greenboot-loading-message.service
 
 %preun
-%systemd_preun greenboot-healthcheck.service
-%systemd_preun greenboot-loading-message.service
-%systemd_preun greenboot-task-runner.service
-%systemd_preun redboot-task-runner.service
-%systemd_preun redboot.target
-%systemd_preun greenboot-status.service
+%systemd_preun greenboot.service
 %systemd_preun greenboot-grub2-set-counter.service
-%systemd_preun greenboot-grub2-set-success.service
-%systemd_preun greenboot-rpm-ostree-grub2-check-fallback.service
-%systemd_preun greenboot-service-monitor.service
-
-%preun default-health-checks
-%systemd_preun greenboot-loading-message.service
 
 %postun
-%systemd_postun greenboot-healthcheck.service
-%systemd_postun greenboot-loading-message.service
-%systemd_postun greenboot-task-runner.service
-%systemd_postun redboot-task-runner.service
-%systemd_postun redboot.target
-%systemd_postun greenboot-status.service
+%systemd_postun greenboot.service
 %systemd_postun greenboot-grub2-set-counter.service
-%systemd_postun greenboot-grub2-set-success.service
-%systemd_postun greenboot-rpm-ostree-grub2-check-fallback.service
-%systemd_postun greenboot-service-monitor.service
-
-%postun default-health-checks
-%systemd_postun greenboot-loading-message.service
 
 %files
 %doc README.md
 %license LICENSE
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/%{name}
-%{_libexecdir}/%{name}/greenboot-loading-message
-%{_unitdir}/greenboot-healthcheck.service
-%{_unitdir}/greenboot-loading-message.service
-%{_unitdir}/greenboot-task-runner.service
-%{_unitdir}/redboot-task-runner.service
-%{_unitdir}/redboot.target
+%{_unitdir}/greenboot.service
+%{_unitdir}/greenboot-grub2-set-counter.service
 %dir %{_prefix}/lib/%{name}
 %dir %{_prefix}/lib/%{name}/check
 %dir %{_prefix}/lib/%{name}/check/required.d
-%{_prefix}/lib/%{name}/check/required.d/00_required_scripts_start.sh
 %dir %{_prefix}/lib/%{name}/check/wanted.d
-%{_prefix}/lib/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 %dir %{_prefix}/lib/%{name}/green.d
 %dir %{_prefix}/lib/%{name}/red.d
 %dir %{_sysconfdir}/%{name}
@@ -146,26 +226,6 @@ Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 %dir %{_sysconfdir}/%{name}/check/wanted.d
 %dir %{_sysconfdir}/%{name}/green.d
 %dir %{_sysconfdir}/%{name}/red.d
-%{_exec_prefix}/lib/motd.d/boot-status
-%{_libexecdir}/%{name}/greenboot-status
-%{_tmpfilesdir}/greenboot-status-motd.conf
-%{_unitdir}/greenboot-status.service
-%{_libexecdir}/%{name}/greenboot-grub2-set-counter
-%{_unitdir}/greenboot-grub2-set-success.service
-%{_unitdir}/greenboot-grub2-set-counter.service
-%{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback
-%{_unitdir}/greenboot-rpm-ostree-grub2-check-fallback.service
-%{_libexecdir}/%{name}/redboot-auto-reboot
-%{_unitdir}/redboot-auto-reboot.service
-%{_libexecdir}/%{name}/greenboot-service-monitor
-%{_unitdir}/greenboot-service-monitor.service
-%{_sysconfdir}/%{name}/greenboot.conf
-
-%files default-health-checks
-%{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
-%{_prefix}/lib/%{name}/check/wanted.d/01_update_platforms_check.sh
-%{_unitdir}/greenboot-healthcheck.service.d/10-network-online.conf
-%{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
 * Thu Sep 08 2022 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.2-1

@@ -1,0 +1,65 @@
+# https://packit.dev/docs/configuration/
+
+specfile_path: greenboot.spec
+
+files_to_sync:
+    - greenboot.spec
+    - .packit.yaml
+
+upstream_package_name: greenboot
+downstream_package_name: greenboot
+
+upstream_tag_template: v{version}
+copy_upstream_release_description: true
+
+# srpm_build_deps: []
+# actions:
+#   get-current-version: bash -c "git describe --tags --abbrev=0 | sed 's|v||'"
+#   post-upstream-clone: "./tools/rpm_spec_add_provides_bundle.sh"
+
+actions:
+  create-archive:
+  - "cargo vendor vendor"
+  - bash -c "git archive --prefix=greenboot-${PACKIT_PROJECT_VERSION}/ --format=tar HEAD > greenboot-${PACKIT_PROJECT_VERSION}.tar"
+  - bash -c "tar -xvf greenboot-${PACKIT_PROJECT_VERSION}.tar"
+  - bash -c "cp -Ra vendor greenboot-${PACKIT_PROJECT_VERSION}"
+  - bash -c "tar -czf greenboot-${PACKIT_PROJECT_VERSION}.tar.gz greenboot-${PACKIT_PROJECT_VERSION}"
+  - bash -c "rm -rf greenboot-${PACKIT_PROJECT_VERSION} greenboot-${PACKIT_PROJECT_VERSION}.tar vendor"
+  - bash -c "ls -1 ./greenboot-*.tar.gz"
+  fix-spec-file:
+  - sed -i greenboot.spec -e "s/with_packit 0/with_packit 1/"
+  #- sed -i greenboot.spec -r \"s/Release:(\s*)\S+/Release:\1${PACKIT_RPMSPEC_RELEASE}%{?dist}/\"
+
+
+jobs:
+# - job: bodhi_update
+#   trigger: commit
+#   dist_git_branches:
+#     - fedora-branched # rawhide updates are created automatically
+# - job: koji_build
+#   trigger: commit
+#   metadata:
+#     dist_git_branches:
+#       - fedora-all
+# - job: propose_downstream
+#   trigger: release
+#   metadata:
+#     dist_git_branches:
+#       - fedora-all
+- job: copr_build
+  trigger: pull_request
+  targets:
+  - centos-stream-9-aarch64
+  - centos-stream-9-x86_64
+  - fedora-all-aarch64
+  - fedora-all
+- job: copr_build
+  trigger: commit
+  branch: main
+  owner: "runcom" # copr repo namespace
+  project: greenboot  # copr repo name so you can consume the builds
+  targets:
+  - centos-stream-9-aarch64
+  - centos-stream-9-x86_64
+  - fedora-all-aarch64
+  - fedora-all
