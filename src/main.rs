@@ -1,9 +1,16 @@
-use std::{collections::HashMap, io::Write, os::unix::prelude::AsRawFd, process::Command};
+use std::hash::Hash;
+use std::io::ErrorKind;
+use std::iter::FromIterator;
+use std::{
+    collections::HashSet,
+    fs::{self, File},
+    process::Command,
+};
 
 use anyhow::{bail, Error, Result};
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand, ValueEnum};
 use glob::glob;
-use nix::mount::{mount, MsFlags};
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -41,35 +48,27 @@ impl LogLevel {
 
 #[derive(Subcommand)]
 enum Commands {
-    Check(CheckArguments),
-    SetCounter(SetCounterArguments),
+    Check,
+    Stamp,
 }
 
-#[derive(Args)]
-struct CheckArguments {}
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash)]
+struct ServiceStatus {
+    unit: String,
+}
 
-#[derive(Args)]
-struct SetCounterArguments {}
-
-fn check(_args: &CheckArguments) -> Result<(), Error> {
-    // TODO: run only if boot_success=0 && boot_counter != "" || empty too
-
-    // TODO: logic for watchdog
-    if is_boot_wd_triggered()? {
-        // do something for wd triggered boot
-    }
-
-    let grub2_editenv_list = parse_grub2_editenv_list()?;
-    if let Some(v) = grub2_editenv_list.get("boot_counter") {
-        if v == "-1" {
-            // TODO: cleanup "bad" upgrade deployment, there's a command I don't remember...
-            Command::new("rpm-ostree").arg("rollback").status()?;
-            Command::new("grub2-editenv")
-                .arg("-")
-                .arg("unset")
-                .arg("boot_counter")
-                .status()?;
+fn check() -> Result<(), Error> {
+    match File::open("/etc/greenboot/upgrade.stamp") {
+        Ok(_) => {
+            log::info!("stamp on disk, removing and running greenboot");
+            std::fs::remove_file("/etc/greenboot/upgrade.stamp")?
         }
+        Err(e) => match e.kind() {
+            ErrorKind::NotFound => return Ok(()),
+            _ => {
+                bail!("unknown error when opening stamp file: {:?}", e);
+            }
+        },
     }
     let mut failure = false;
     for path in [
@@ -77,49 +76,73 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         "/etc/greenboot/check/required.d/*.sh",
     ] {
         for entry in glob(path)?.flatten() {
-            let status = Command::new("bash").arg("-C").arg(entry).status()?;
-            if !status.success() {
+            log::info!("running required check {}", entry.to_string_lossy());
+            let output = Command::new("bash").arg("-C").arg(entry).output()?;
+            if !output.status.success() {
+                // combine and print stderr/stdout
                 log::warn!("required script failed...");
                 failure = true;
             }
         }
     }
-    // for path in [
-    //     "/usr/lib/greenboot/check/wanted.d/*.sh",
-    //     "/etc/greenboot/check/wanted.d/*.sh",
-    // ] {
-    //     for entry in glob(path)?.flatten() {
-    //         let status = Command::new("bash").arg("-C").arg(entry).status()?;
-    //         if !status.success() {
-    //             log::warn!("wanted script failed...");
-    //         }
-    //     }
-    // }
+    for path in [
+        "/usr/lib/greenboot/check/wanted.d/*.sh",
+        "/etc/greenboot/check/wanted.d/*.sh",
+    ] {
+        for entry in glob(path)?.flatten() {
+            log::info!("running required check {}", entry.to_string_lossy());
+            let output = Command::new("bash").arg("-C").arg(entry).output()?;
+            if !output.status.success() {
+                // combine and print stderr/stdout
+                log::warn!("wanted script failed...");
+            }
+        }
+    }
+    // if a command with restart option in systemd fails to start we don't get it as "failed"
+    // reversing the check makes sure that if by the time After=multi-user the service isn't running then it's failing at least
+    let output = Command::new("systemctl")
+        .arg("list-units")
+        .arg("--state")
+        .arg("active")
+        .arg("--no-page")
+        .arg("--output")
+        .arg("json")
+        .output()?;
+    let services: Vec<ServiceStatus> = serde_json::from_str(&String::from_utf8(output.stdout)?)?;
+    let ss: Vec<String> = services.iter().map(|x| x.unit.clone()).collect();
+    let active_units: HashSet<String> = HashSet::from_iter(ss);
+    for service in ["sshd.service", "NetworkManager.service"] {
+        if !active_units.contains(service) {
+            log::warn!("service {} failed, see journal", service);
+            failure = true;
+        }
+    }
     if failure {
-        // TODO: run red checks...
-        log::warn!("required scripts failed, check logs, exiting...");
-        if !grub2_editenv_list.contains_key("boot_counter") {
-            bail!("<0>SYSTEM is UNHEALTHY, but boot_counter is unset in grubenv. Manual intervention necessary.");
+        for path in ["/etc/greenboot/red.d/*.sh"] {
+            for entry in glob(path)?.flatten() {
+                log::info!("running red check {}", entry.to_string_lossy());
+                let output = Command::new("bash").arg("-C").arg(entry).output()?;
+                if !output.status.success() {
+                    // combine and print stderr/stdout
+                    log::warn!("red script failed...");
+                }
+            }
         }
-        if glob("/boot/loader/entries/*")?.count() == 1 {
-            bail!("<0>SYSTEM is UNHEALTHY, but bootlader entry count is 1. Manual intervention necessary.");
-        }
-        log::warn!("<1>SYSTEM is UNHEALTHY. Rebooting...");
+        log::warn!("SYSTEM is UNHEALTHY. Rolling back and rebooting...");
+        Command::new("rpm-ostree").arg("rollback").status()?;
         reboot()?;
         return Ok(());
     }
-    // TODO: run green checks...
-    // TODO: if we are here, we need to cleanup all other previous deployments
-    Command::new("grub2-editenv")
-        .arg("-")
-        .arg("set")
-        .arg("boot_success=1")
-        .status()?;
-    Command::new("grub2-editenv")
-        .arg("-")
-        .arg("unset")
-        .arg("boot_counter")
-        .status()?;
+    for path in ["/etc/greenboot/green.d/*.sh"] {
+        for entry in glob(path)?.flatten() {
+            log::info!("running green check {}", entry.to_string_lossy());
+            let output = Command::new("bash").arg("-C").arg(entry).output()?;
+            if !output.status.success() {
+                // combine and print stderr/stdout
+                log::warn!("green script failed...");
+            }
+        }
+    }
     Ok(())
 }
 
@@ -128,64 +151,10 @@ fn reboot() -> Result<(), Error> {
     Ok(())
 }
 
-const WATCHDOG_IOCTL_BASE: u8 = b'W';
-const WDIOC_TYPE_MODE: u8 = 2;
-nix::ioctl_read!(wd_getbootstatus, WATCHDOG_IOCTL_BASE, WDIOC_TYPE_MODE, i32);
-
-fn from_nix_result<T>(res: ::nix::Result<T>) -> std::io::Result<T> {
-    match res {
-        Ok(r) => Ok(r),
-        Err(err) => Err(err.into()),
-    }
-}
-
-fn is_boot_wd_triggered() -> Result<bool, Error> {
-    let mut devfile = std::fs::OpenOptions::new();
-    devfile.read(true).write(true).create(false);
-    let mut wd = match devfile.open("/dev/watchdog") {
-        Ok(file) => file,
-        Err(_) => {
-            log::warn!("no watchdog");
-            return Ok(false);
-        }
-    };
-    let mut boot_status: i32 = 0;
-    from_nix_result(unsafe { wd_getbootstatus(wd.as_raw_fd(), &mut boot_status) })?;
-    wd.write_all("V".as_bytes())?;
-    Ok(boot_status == 1)
-}
-
-fn set_counter(_args: &SetCounterArguments) -> Result<()> {
-    // all commands for grub2/systemctl need an abstraction to mock them in testing...
-    Command::new("grub2-editenv")
-        .arg("-")
-        .arg("set")
-        .arg("boot_success=0")
-        .spawn()?;
-    Command::new("grub2-editenv")
-        .arg("-")
-        .arg("set")
-        .arg("boot_counter=1")
-        .spawn()?;
+fn stamp() -> Result<(), Error> {
+    fs::create_dir_all("/etc/greenboot/")?;
+    File::create("/etc/greenboot/upgrade.stamp")?;
     Ok(())
-}
-
-fn parse_grub2_editenv_list() -> Result<HashMap<String, String>> {
-    let output = Command::new("grub2-editenv").arg("list").output()?;
-    let stdout = String::from_utf8(output.stdout)?;
-    let split = stdout.split('\n').collect::<Vec<&str>>();
-    let mut hm = HashMap::new();
-    for s in split {
-        if s.is_empty() {
-            continue;
-        }
-        let ss = s.split('=').collect::<Vec<&str>>();
-        if ss.len() != 2 {
-            continue;
-        }
-        hm.insert(ss[0].to_string(), ss[1].to_string());
-    }
-    Ok(hm)
 }
 
 fn main() -> Result<()> {
@@ -195,10 +164,8 @@ fn main() -> Result<()> {
         .filter_level(cli.log_level.to_log())
         .init();
 
-    mount::<str, str, str, str>(None, "/boot", None, MsFlags::MS_REMOUNT, None)?;
-
     match cli.command {
-        Commands::Check(args) => check(&args),
-        Commands::SetCounter(args) => set_counter(&args),
+        Commands::Check => check(),
+        Commands::Stamp => stamp(),
     }
 }

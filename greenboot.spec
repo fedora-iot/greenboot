@@ -35,7 +35,6 @@ BuildRequires:  rust-packaging
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
-Requires:           grub2-tools-minimal
 Requires:           rpm-ostree
 # PAM is required to programmatically read motd messages from /etc/motd.d/*
 # This causes issues with RHEL-8 as the fix isn't there an el8 is on pam-1.3.x
@@ -53,7 +52,7 @@ Obsoletes:          greenboot-status <= 0.12.0
 Provides:           greenboot-rpm-ostree-grub2
 Obsoletes:          greenboot-rpm-ostree-grub2 <= 0.12.0
 # List of bundled crate in vendor tarball, generated with:
-# cargo metadata --locked --format-version 1 | CRATE_NAME="greenboot" ../bundled-provides.jq
+# cargo metadata --locked --format-version 1 | CRATE_NAME="greenboot" ./bundled-provides.jq
 Provides: bundled(crate(ahash)) = 0.7.6
 Provides: bundled(crate(aho-corasick)) = 0.7.19
 Provides: bundled(crate(anyhow)) = 1.0.65
@@ -197,15 +196,15 @@ mkdir -p %{buildroot}%{_tmpfilesdir}
 
 %post
 %systemd_post greenboot.service
-%systemd_post greenboot-grub2-set-counter.service
+%systemd_post greenboot-trigger.service
 
 %preun
 %systemd_preun greenboot.service
-%systemd_preun greenboot-grub2-set-counter.service
+%systemd_preun greenboot-trigger.service
 
 %postun
 %systemd_postun greenboot.service
-%systemd_postun greenboot-grub2-set-counter.service
+%systemd_postun greenboot-trigger.service
 
 %files
 %doc README.md
@@ -213,7 +212,7 @@ mkdir -p %{buildroot}%{_tmpfilesdir}
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/%{name}
 %{_unitdir}/greenboot.service
-%{_unitdir}/greenboot-grub2-set-counter.service
+%{_unitdir}/greenboot-trigger.service
 %dir %{_prefix}/lib/%{name}
 %dir %{_prefix}/lib/%{name}/check
 %dir %{_prefix}/lib/%{name}/check/required.d
