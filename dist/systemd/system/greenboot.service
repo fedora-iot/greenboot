@@ -1,6 +1,6 @@
 [Unit]
 Description=Greenboot TODO
-After=multi-user.target
+After=default.target
 Before=boot-complete.target
 Conflicts=shutdown.target
 Before=shutdown.target

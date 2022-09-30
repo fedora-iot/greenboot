@@ -60,12 +60,12 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
     let grub2_editenv_list = parse_grub2_editenv_list()?;
     if let Some(v) = grub2_editenv_list.get("boot_counter") {
         if v == "-1" {
-            Command::new("rpm-ostree").arg("rollback").spawn()?;
+            Command::new("rpm-ostree").arg("rollback").status()?;
             Command::new("grub2-editenv")
                 .arg("-")
                 .arg("unset")
                 .arg("boot_counter")
-                .spawn()?;
+                .status()?;
         }
     }
     let mut failure = false;
@@ -110,12 +110,12 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         .arg("-")
         .arg("set")
         .arg("boot_success=1")
-        .spawn()?;
+        .status()?;
     Command::new("grub2-editenv")
         .arg("-")
         .arg("unset")
         .arg("boot_counter")
-        .spawn()?;
+        .status()?;
     Ok(())
 }
 
