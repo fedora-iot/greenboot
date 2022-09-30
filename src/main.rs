@@ -147,7 +147,7 @@ fn is_boot_wd_triggered() -> Result<bool, Error> {
     };
     let mut boot_status: i32 = 0;
     from_nix_result(unsafe { wd_getbootstatus(wd.as_raw_fd(), &mut boot_status) })?;
-    wd.write("V".as_bytes())?;
+    wd.write_all("V".as_bytes())?;
     Ok(boot_status == 1)
 }
 
