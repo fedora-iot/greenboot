@@ -52,6 +52,8 @@ struct CheckArguments {}
 struct SetCounterArguments {}
 
 fn check(_args: &CheckArguments) -> Result<(), Error> {
+    // TODO: run only if boot_success=0 && boot_counter != "" || empty too
+
     // TODO: logic for watchdog
     if is_boot_wd_triggered()? {
         // do something for wd triggered boot
@@ -60,6 +62,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
     let grub2_editenv_list = parse_grub2_editenv_list()?;
     if let Some(v) = grub2_editenv_list.get("boot_counter") {
         if v == "-1" {
+            // TODO: cleanup "bad" upgrade deployment, there's a command I don't remember...
             Command::new("rpm-ostree").arg("rollback").status()?;
             Command::new("grub2-editenv")
                 .arg("-")
@@ -106,6 +109,7 @@ fn check(_args: &CheckArguments) -> Result<(), Error> {
         return Ok(());
     }
     // TODO: run green checks...
+    // TODO: if we are here, we need to cleanup all other previous deployments
     Command::new("grub2-editenv")
         .arg("-")
         .arg("set")

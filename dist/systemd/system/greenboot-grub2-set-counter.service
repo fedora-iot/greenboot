@@ -6,7 +6,8 @@ Before=ostree-finalize-staged.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot set-counter
+ExecStart=/usr/libexec/greenboot/greenboot set-counter
+MountFlags=slave
 
 [Install]
 RequiredBy=ostree-finalize-staged.service

@@ -8,7 +8,7 @@ Before=shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/libexec/greenboot check
+ExecStart=/usr/libexec/greenboot/greenboot check
 MountFlags=slave
 
 [Install]
