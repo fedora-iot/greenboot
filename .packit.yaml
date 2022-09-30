@@ -52,8 +52,8 @@ jobs:
   targets:
   - centos-stream-9-aarch64
   - centos-stream-9-x86_64
-  - fedora-all-aarch64
-  - fedora-all
+  - fedora-development-aarch64
+  - fedora-development
 - job: copr_build
   trigger: commit
   branch: main
@@ -62,5 +62,5 @@ jobs:
   targets:
   - centos-stream-9-aarch64
   - centos-stream-9-x86_64
-  - fedora-all-aarch64
-  - fedora-all
+  - fedora-development-aarch64
+  - fedora-development
