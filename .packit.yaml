@@ -6,7 +6,7 @@ files_to_sync:
     - greenboot.spec
     - .packit.yaml
 
-upstream_package_name: greenboot
+upstream_package_name: greenboot-rs
 downstream_package_name: greenboot
 
 upstream_tag_template: v{version}
