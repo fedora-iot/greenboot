@@ -1,7 +1,7 @@
 use std::{collections::HashMap, io::Write, os::unix::prelude::AsRawFd, process::Command};
 
 use anyhow::{bail, Error, Result};
-use clap::{ArgEnum, Args, Parser, Subcommand};
+use clap::{ValueEnum, Args, Parser, Subcommand};
 use glob::glob;
 use nix::mount::{mount, MsFlags};
 
@@ -9,14 +9,14 @@ use nix::mount::{mount, MsFlags};
 #[clap(author, version, about, long_about = None)]
 #[clap(propagate_version = true)]
 struct Cli {
-    #[clap(arg_enum, short, long, default_value_t = LogLevel::Info)]
+    #[clap(value_enum, short, long, default_value_t = LogLevel::Info)]
     log_level: LogLevel,
 
     #[clap(subcommand)]
     command: Commands,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum LogLevel {
     Trace,
     Debug,
