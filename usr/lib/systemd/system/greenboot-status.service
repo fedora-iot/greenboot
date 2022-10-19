@@ -12,7 +12,6 @@ Description=greenboot MotD Generator
 After=greenboot-healthcheck.service
 After=greenboot-task-runner.service
 After=redboot-task-runner.service
-DefaultDependencies=no
 
 [Service]
 Type=oneshot
