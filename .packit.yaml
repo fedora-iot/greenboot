@@ -1,5 +1,5 @@
 specfile_path: greenboot.spec
-synced_files:
+files_to_sync:
   - greenboot.spec
   - .packit.yaml
 upstream_package_name: greenboot
@@ -10,10 +10,9 @@ jobs:
     trigger: commit
   - job: propose_downstream
     trigger: release
-    metadata:
-      dist-git-branch: fedora-all
+    dist_git_branches:
+      - fedora-all
   - job: tests
     trigger: pull_request
-    metadata:
-      targets:
-        - fedora-all
+    targets:
+      - fedora-all
