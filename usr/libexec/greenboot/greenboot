@@ -51,6 +51,6 @@ case "$1" in
     script_runner "/etc/greenboot/red.d" "relaxed" "Running Red Scripts..."
     ;;
   *)
-    echo "Illegal Command" >&2
-    exit 127
+    echo "Unknown argument, exiting." >&2
+    exit 1
 esac

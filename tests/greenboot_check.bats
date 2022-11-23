@@ -11,10 +11,10 @@ function setup() {
   mv $GREENBOOT_DEFAULT_CHECK_PATH/wanted.d/* $GREENBOOT_ETC_CHECK_PATH/wanted.d/
 }
 
-@test "Test greenboot with illegal command" {
+@test "Test greenboot with unknown argument" {
   run $GREENBOOT_BIN_PATH bananas
-  [ "$status" -eq 127 ]
-  [ "$output" = "Illegal Command" ]
+  [ "$status" -eq 1 ]
+  [ "$output" = "Unknown argument, exiting." ]
 }
 
 @test "Test greenboot check with the default hc scripts" {
