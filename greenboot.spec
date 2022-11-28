@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.15.2
+Version:            0.15.3
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -166,6 +166,10 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Mon Nov 28 2022 Paul Whalen <pwhalen@fedoraproject.org> - 0.15.3-1
+- The 0.15.3 release
+- revert service-monitor
+
 * Thu Sep 08 2022 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.2-1
 - The 0.15.2 release
 
