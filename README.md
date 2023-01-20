@@ -33,7 +33,7 @@ Place shell scripts representing *health checks* that **MAY FAIL** in the `/etc/
 Place shell scripts you want to run *after* a boot has been declared **successful** (green) in `/etc/greenboot/green.d`.
 Place shell scripts you want to run *after* a boot has been declared **failed** (red) in `/etc/greenboot/red.d`.
 
-Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot-task-runner greenboot-healthcheck greenboot-status greenboot-loading-message`.
+Unless greenboot is enabled by default in your distribution, enable it by running `systemctl enable greenboot-task-runner greenboot-healthcheck greenboot-status greenboot-loading-message greenboot-grub2-set-counter greenboot-grub2-set-success greenboot-rpm-ostree-grub2-check-fallback redboot-auto-reboot redboot-task-runner`.
 It will automatically start during the next boot process and run its checks.
 
 When you `ssh` into the machine after that, a boot status message will be shown:
