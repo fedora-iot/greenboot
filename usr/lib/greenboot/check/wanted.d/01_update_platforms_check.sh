@@ -5,15 +5,15 @@ REPOS_DIRECTORY=/etc/ostree/remotes.d
 URLS_WITH_PROBLEMS=()
 
 get_update_platform_urls() {
-    UPDATE_PLATFORM_URLS=$(grep -P -ho 'http[s]?.*' $REPOS_DIRECTORY/*)
-    if [[ -z $UPDATE_PLATFORM_URLS ]]; then
+    mapfile -t UPDATE_PLATFORM_URLS < <(grep -P -ho 'http[s]?.*' "${REPOS_DIRECTORY}"/*)
+    if [[ ${#UPDATE_PLATFORM_URLS[@]} -eq 0 ]]; then
         echo "No update platforms found, this can be a mistake"
         exit 1
     fi
 }
 
 assert_update_platforms_are_responding() {
-    for UPDATE_PLATFORM_URL in ${UPDATE_PLATFORM_URLS[*]}; do
+    for UPDATE_PLATFORM_URL in "${UPDATE_PLATFORM_URLS[@]}"; do
         HTTP_STATUS=$(curl -o /dev/null -Isw '%{http_code}\n' "$UPDATE_PLATFORM_URL" || echo "Unreachable")
         if ! [[ $HTTP_STATUS == 2* ]] && ! [[ $HTTP_STATUS == 3* ]]; then
             URLS_WITH_PROBLEMS+=( "$UPDATE_PLATFORM_URL" )
