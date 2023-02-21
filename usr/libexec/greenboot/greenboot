@@ -3,7 +3,9 @@ set -euo pipefail
 IFS=$'\n\t'
 LC_ALL=C
 
-SCRIPTS_PATHS=("/usr/lib/greenboot/check" "/etc/greenboot/check")
+SCRIPTS_CHECK_PATHS=("/usr/lib/greenboot/check" "/etc/greenboot/check")
+SCRIPTS_GREEN_PATHS=("/usr/lib/greenboot/green.d" "/etc/greenboot/green.d")
+SCRIPTS_RED_PATHS=("/usr/lib/greenboot/red.d" "/etc/greenboot/red.d")
 
 script_runner () {
   local scripts_dir=$1; shift
@@ -37,18 +39,22 @@ script_runner () {
 
 case "$1" in
   "check")
-    for health_check_path in "${SCRIPTS_PATHS[@]}"; do
+    for health_check_path in "${SCRIPTS_CHECK_PATHS[@]}"; do
       script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || exit 1
       script_runner "$health_check_path/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     done
     ;;
   "green")
     echo "<5>Boot Status is GREEN - Health Check SUCCESS"
-    script_runner "/etc/greenboot/green.d" "relaxed" "Running Green Scripts..."
+    for green_path in "${SCRIPTS_GREEN_PATHS[@]}"; do
+        script_runner "$green_path" "relaxed" "Running Green Scripts..."
+    done
     ;;
   "red")
     echo "<0>Boot Status is RED - Health Check FAILURE!"
-    script_runner "/etc/greenboot/red.d" "relaxed" "Running Red Scripts..."
+    for red_path in "${SCRIPTS_RED_PATHS[@]}"; do
+        script_runner "$red_path" "relaxed" "Running Red Scripts..."
+    done
     ;;
   *)
     echo "Unknown argument, exiting." >&2
