@@ -32,17 +32,17 @@ script_runner () {
     fi
   done
 
-  if [[ $required_hc_failed == true ]]; then
-    exit 1
-  fi
+  [[ $required_hc_failed == false ]]
 }
 
 case "$1" in
   "check")
+    rc=0
     for health_check_path in "${SCRIPTS_CHECK_PATHS[@]}"; do
-      script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || exit 1
+      script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || rc=1
       script_runner "$health_check_path/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     done
+    exit $rc
     ;;
   "green")
     echo "<5>Boot Status is GREEN - Health Check SUCCESS"
