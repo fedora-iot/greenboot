@@ -9,6 +9,11 @@ upstream_tag_template: v{version}
 downstream_package_name: greenboot
 
 jobs:
+  - job: copr_build
+    trigger: pull_request
+    targets:
+    - fedora-all
+  
 
   - job: sync_from_downstream
     trigger: commit
