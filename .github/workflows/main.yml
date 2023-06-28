@@ -14,11 +14,26 @@ jobs:
   shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Run Shellcheck
-        uses: ludeeus/action-shellcheck@master
-        env:
-          SHELLCHECK_OPTS: -x
+      - uses: actions/checkout@v3
         with:
-          ignore_paths: tests
+          fetch-depth: 0
+
+      - id: ShellCheck
+        name: Differential ShellCheck
+        uses: redhat-plumbers-in-action/differential-shellcheck@v4
+        with:
+          exclude-path: tests/**
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ always() }}
+        name: Upload artifact with ShellCheck defects in SARIF format
+        uses: actions/upload-artifact@v3
+        with:
+          name: Differential ShellCheck SARIF
+          path: ${{ steps.ShellCheck.outputs.sarif }}
