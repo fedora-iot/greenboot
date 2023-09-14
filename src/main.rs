@@ -9,7 +9,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str;
 
-/// dir that greenboot looks for the health-check and other scripts
+/// dir that greenboot looks for the health check and other scripts
 static GREENBOOT_INSTALL_PATHS: [&str; 2] = ["/usr/lib/greenboot", "/etc/greenboot"];
 
 /// greenboot config path
@@ -37,7 +37,7 @@ impl GreenbootConfig {
     fn set_default() -> Self {
         Self { max_reboot: 3 }
     }
-    /// gets the config form the config file
+    /// gets the config from the config file
     fn get_config() -> Self {
         let mut config = Self::set_default();
         let parsed = Config::builder()
@@ -97,7 +97,7 @@ enum Commands {
     Rollback,
 }
 
-/// this run the diagnostics in require.d and check.d
+/// this runs the scripts in required.d and wanted.d
 fn run_diagnostics() -> Result<(), Error> {
     let mut script_failure: bool = false;
     let mut path_exists: bool = false;
@@ -128,8 +128,8 @@ fn run_diagnostics() -> Result<(), Error> {
     }
 
     for path in GREENBOOT_INSTALL_PATHS {
-        let gereenboot_wanted_path = format!("{path}/check/wanted.d/*.sh");
-        for entry in glob(&gereenboot_wanted_path)?.flatten() {
+        let greenboot_wanted_path = format!("{path}/check/wanted.d/*.sh");
+        for entry in glob(&greenboot_wanted_path)?.flatten() {
             log::info!("running wanted check {}", entry.to_string_lossy());
             let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
             if !output.status.success() {
@@ -196,7 +196,7 @@ fn run_green() -> Result<(), Error> {
 fn health_check() -> Result<()> {
     let config = GreenbootConfig::get_config();
     log::info!("{config:?}");
-    handle_motd("healthcheck is in progress").ok();
+    handle_motd("healthcheck is in progress")?;
     let run_status = run_diagnostics();
     match run_status {
         Ok(()) => {
@@ -220,7 +220,7 @@ fn health_check() -> Result<()> {
                 .unwrap_or_else(|e| log::error!("cannot set boot_counter as: {}", e.to_string()));
             handle_reboot(false)
                 .unwrap_or_else(|e| log::error!("cannot reboot as: {}", e.to_string()));
-            bail!(e);
+            Err(e)
         }
     }
 }
@@ -231,8 +231,7 @@ fn trigger_rollback() -> Result<()> {
         Ok(()) => {
             log::info!("Rollback successful");
             unset_boot_counter()?;
-            handle_reboot(true)?;
-            Ok(())
+            handle_reboot(true)
         }
         Err(e) => {
             bail!("Rollback not initiated as {}", e);
@@ -248,7 +247,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::HealthCheck => health_check(),
-        Commands::Rollback => trigger_rollback(), // will tackle the functionality later
+        Commands::Rollback => trigger_rollback(),
     }
 }
 
@@ -260,7 +259,7 @@ mod tests {
 
     use super::*;
 
-    //validate when required folder is not found
+    ///validate when the required folder is not found
     #[test]
     fn missing_required_folder() {
         assert_eq!(

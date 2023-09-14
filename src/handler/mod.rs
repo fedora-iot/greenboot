@@ -1,18 +1,19 @@
-/// This module most of low-level commands
+/// This module contains most of the low-level commands
 /// and grub variable modifications
-use anyhow::{bail, Error, Result};
-use std::fs::OpenOptions;
-use std::io::Write;
+use anyhow::{bail, Result};
 use std::process::Command;
 use std::str;
 
-/// reboots the system if boot_counter is greater 0 or can be forced too
-pub fn handle_reboot(force: bool) -> Result<(), Error> {
+/// reboots the system if boot_counter is greater than 0 or can be forced too
+pub fn handle_reboot(force: bool) -> Result<()> {
     if !force {
         match get_boot_counter() {
-            Some(t) if t <= 0 => bail!("countdown ended, check greenboot-rollback status"),
+            Some(t) => {
+                if t <= 0 {
+                    bail!("countdown ended, check greenboot-rollback status")
+                }
+            }
             None => bail!("boot_counter is not set"),
-            _ => {}
         }
     }
     log::info!("restarting system");
@@ -23,37 +24,32 @@ pub fn handle_reboot(force: bool) -> Result<(), Error> {
     bail!("systemd returned error");
 }
 
-/// rollback to previous ostree deployment if boot counter is les than 0
-pub fn handle_rollback() -> Result<(), Error> {
-    match get_boot_counter() {
-        Some(t) if t <= 0 => {
-            log::info!("Greenboot will now attempt rollback");
+/// rollback to previous ostree deployment if boot counter is less than 0
+pub fn handle_rollback() -> Result<()> {
+    if let Some(t) = get_boot_counter() {
+        if t <= 0 {
+            log::info!("Greenboot will now attempt to rollback");
             let status = Command::new("rpm-ostree").arg("rollback").status()?;
             if status.success() {
                 return Ok(());
             }
             bail!(status.to_string());
         }
-        _ => log::info!("Rollback not initiated as boot_counter is either unset or not equal to 0"),
     }
+    log::info!("Rollback not initiated as boot_counter is either unset or not equal to 0");
     Ok(())
 }
 
 /// sets grub variable boot_counter if not set
 pub fn set_boot_counter(reboot_count: i32) -> Result<()> {
-    match get_boot_counter() {
-        Some(counter) => {
-            log::info!("boot_counter={counter}");
-            Ok(())
-        }
-        None => {
-            if set_grub_var("boot_counter", reboot_count) {
-                log::info!("boot_counter={reboot_count}");
-                return Ok(());
-            }
-            bail!("grub returned error");
-        }
+    if let Some(current_counter) = get_boot_counter() {
+        log::info!("boot_counter={current_counter}");
+        return Ok(());
+    } else if set_grub_var("boot_counter", reboot_count) {
+        log::info!("Set boot_counter={reboot_count}");
+        return Ok(());
     }
+    bail!("Failed to set GRUB variable: boot_counter");
 }
 
 /// resets grub variable boot_counter
@@ -66,38 +62,34 @@ pub fn unset_boot_counter() -> Result<()> {
     if status.success() {
         return Ok(());
     }
-    bail!("grub returned error")
+    bail!("grub returned an error")
 }
 
 /// sets grub variable boot_success
 pub fn handle_boot_success(success: bool) -> Result<()> {
     if success {
         if !set_grub_var("boot_success", 1) {
-            bail!("unable to mark boot as success, grub returned error")
+            bail!("unable to mark boot as success, grub returned an error")
         }
         match unset_boot_counter() {
             Ok(_) => return Ok(()),
             Err(e) => bail!("unable to remove boot_counter, {e}"),
         }
     } else if !set_grub_var("boot_success", 0) {
-        bail!("unable to mark boot as failure, grub returned error")
+        bail!("unable to mark boot as failure, grub returned an error")
     }
     Ok(())
 }
 
 /// writes greenboot status to motd.d/boot-status
-pub fn handle_motd(state: &str) -> Result<(), Error> {
+pub fn handle_motd(state: &str) -> Result<()> {
     let motd = format!("Greenboot {state}.");
 
-    let mut motd_file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open("/etc/motd.d/boot-status")?;
-    motd_file.write_all(motd.as_bytes())?;
+    std::fs::write("/etc/motd.d/boot-status", motd.as_bytes())?;
     Ok(())
 }
 
-/// fetches boot_counter value, none is not set  
+/// fetches boot_counter value, none if not set
 pub fn get_boot_counter() -> Option<i32> {
     let grub_vars = Command::new("grub2-editenv").arg("-").arg("list").output();
     if grub_vars.is_err() {

@@ -4,6 +4,7 @@ RUN bash -c "$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode-de
 
 RUN dnf install -y \
     sudo git cargo rust rust-src git-core clippy rustfmt \
+    rust-packaging rpmdevtools rpmlint \
     && dnf clean all
 
 USER vscode
