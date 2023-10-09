@@ -170,13 +170,15 @@ cat >.cargo/config << EOF
 [build]
 rustc = "%{__rustc}"
 rustdoc = "%{__rustdoc}"
-flags = ["-j4", "-Z", "avoid-dev-deps", "--profile release"]
 %if 0%{?rhel} && !0%{?eln}
-rustflags = flags
+rustflags = %{__global_rustflags_toml}
 %else
-rustflags = "flags"
+rustflags = "%{__global_rustflags_toml}"
 %endif
- 
+
+[profile.rpm]
+inherits = "release"
+
 [install]
 root = "%{buildroot}%{_prefix}"
  
