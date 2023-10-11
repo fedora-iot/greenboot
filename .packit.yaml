@@ -31,13 +31,9 @@ jobs:
   - job: koji_build
     trigger: commit
     dist_git_branches:
-      - fedora-development
-      - fedora-37
-      - fedora-38
+      - fedora-all
 
   - job: bodhi_update
     trigger: commit
     dist_git_branches:
-      # rawhide updates are created automatically
-      - fedora-37
-      - fedora-38
+      - fedora-all
