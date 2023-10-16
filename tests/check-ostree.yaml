@@ -1,0 +1,388 @@
+---
+- hosts: ostree_guest
+  become: no
+  vars:
+    total_counter: "0"
+    failed_counter: "0"
+
+  tasks:
+
+    # current target host's IP address
+    - debug: var=ansible_all_ipv4_addresses
+    - debug: var=ansible_facts['distribution_version']
+    - debug: var=ansible_facts['distribution']
+    - debug: var=ansible_facts['architecture']
+
+    # check BIOS or UEFI
+    - name: check bios or uefi
+      stat:
+        path: /sys/firmware/efi
+
+    # check secure boot status if it's enabled
+    - name: check secure boot status
+      command: mokutil --sb-state
+      ignore_errors: yes
+
+    - name: check partition size
+      command: df -h
+      ignore_errors: yes
+      become: yes
+
+    - name: check disk partition table
+      command: fdisk -l
+      ignore_errors: yes
+      become: yes
+
+    - name: check rpm-ostree status
+      command: rpm-ostree status
+      ignore_errors: yes
+
+    - name: check installed kernel
+      command: uname -r
+      register: result_kernel
+
+    # first installed or upgraded
+    - name: determin which stage the checking is running on
+      shell: rpm-ostree status --json | jq '.deployments | length'
+      register: result_stage
+
+    - set_fact:
+        checking_stage: "{{ result_stage.stdout }}"
+
+    # case: check ostree commit correctly updated
+    - name: get deployed ostree commit
+      shell: rpm-ostree status --json | jq -r '.deployments[0].checksum'
+      register: result_commit
+
+    - name: make a json result
+      set_fact:
+        deploy_commit: "{{ result_commit.stdout }}"
+
+    - name: check commit deployed and built
+      block:
+        - assert:
+            that:
+              - deploy_commit == ostree_commit
+            fail_msg: "deployed ostree commit is not commit built by osbuild-composer"
+            success_msg: "successful building and deployment"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check ostree ref
+    - name: check ostree ref
+      shell: rpm-ostree status --json | jq -r '.deployments[0].origin'
+      register: result_ref
+
+    - name: check ostree ref deployed
+      block:
+        - assert:
+            that:
+              - result_ref.stdout == ostree_ref
+            fail_msg: "deployed ostree ref failed"
+            success_msg: "ostree ref successful building and deployment"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    - name: check mount point device name
+      command: findmnt
+
+    # case: check wget installed after upgrade
+    - name: check installed package
+      shell: rpm -qa | sort
+      register: result_packages
+
+    - name: check wget installed
+      block:
+        - assert:
+            that:
+              - "'wget' in result_packages.stdout"
+            fail_msg: "wget not installed, ostree upgrade might be failed"
+            success_msg: "wget installed in ostree upgrade"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+      when: checking_stage == "2"
+
+    # case: check installed greenboot packages
+    - name: greenboot should be installed
+      block:
+        - name: greenboot should be installed
+          shell: rpm -qa | grep greenboot
+          register: result_greenboot_packages
+
+        - assert:
+            that:
+              - "'greenboot-1' in result_greenboot_packages.stdout"
+              - "'greenboot-default-health-checks' in result_greenboot_packages.stdout"
+            fail_msg: "greenboot is not installed"
+            success_msg: "greenboot is installed"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check greenboot services
+    - name: greenboot services should be enabled
+      block:
+        - name: greenboot services should be enabled
+          command: systemctl is-enabled greenboot-healthcheck.service greenboot-rollback.service
+          register: result_greenboot_service
+
+        - assert:
+            that:
+              - result_greenboot_service.stdout == 'enabled\nenabled'
+            fail_msg: "greenboot services are not enabled"
+            success_msg: "greenboot services are enabled"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    - name: greenboot-healthcheck service should be active
+      block:
+        - name: greenboot-healthcheck service should be active
+          command: systemctl is-active greenboot-healthcheck.service
+          register: result_greenboot_service
+
+        - assert:
+            that:
+              - result_greenboot_service.stdout == 'active'
+            fail_msg: "greenboot services are not active"
+            success_msg: "greenboot services are active"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check greenboot and greenboot-rollback services log
+    - name: greenboot service should run without error
+      block:
+        - name: all greenboot and greenboot-healthcheck services should run without error
+          command: journalctl -b -0 -u greenboot -u greenboot-healthcheck
+          become: yes
+          register: result_greenboot_log
+
+        - assert:
+            that:
+              - "'greenboot health-check passed' in result_greenboot_log.stdout"
+            fail_msg: "Some errors happened in service boot"
+            success_msg: "All greenboot services booted success"
+
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check grubenv variables
+    - name: grubenv variables should contain boot_success=1
+      block:
+        - name: grubenv variables should contain boot_success=1
+          command: grub2-editenv list
+          register: result_grubenv
+          become: yes
+
+        - assert:
+            that:
+              - "'boot_success=1' in result_grubenv.stdout"
+            fail_msg: "Not found boot_success=1"
+            success_msg: "Found boot_success=1"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check rollback function if boot error found
+    - name: install sanely failing health check unit to test red boot status behavior
+      block:
+        - name: install sanely failing health check unit to test red boot status behavior
+          command: rpm-ostree install --cache-only https://kite-webhook-prod.s3.amazonaws.com/greenboot-failing-unit-1.0-1.el8.noarch.rpm --reboot
+          become: yes
+          ignore_errors: yes
+          ignore_unreachable: yes
+
+        - block:
+            - name: delay 60 seconds after reboot to make system stable
+              pause:
+                seconds: 60
+              delegate_to: 127.0.0.1
+
+            - name: wait for connection to become reachable/usable
+              wait_for_connection:
+                delay: 30
+              register: result_rebooting
+
+            - name: waits until instance is reachable
+              wait_for:
+                host: "{{ ansible_all_ipv4_addresses[0] }}"
+                port: 22
+                search_regex: OpenSSH
+                delay: 10
+              register: result_rollback
+              until: result_rollback is success
+              retries: 6
+              delay: 10
+              ignore_unreachable: yes
+
+            - fail:
+                msg: "Failed here for unreachable to run rescue"
+              when: result_rollback.unreachable is defined
+
+          rescue:
+            # manual reboot VM to workaround vm reboot failed issue
+            - name: check vm name
+              community.libvirt.virt:
+                command: list_vms
+              become: yes
+              register: all_vms
+              delegate_to: 127.0.0.1
+
+            - set_fact:
+                vm_name: "{{ item }}"
+              loop: "{{ all_vms.list_vms }}"
+              when: item is match ("ostree-.*")
+
+            - debug: var=vm_name
+
+            - name: stop vm "{{ vm_name }}"
+              community.libvirt.virt:
+                name: "{{ vm_name }}"
+                command: destroy
+              become: yes
+              delegate_to: 127.0.0.1
+
+            - name: start vm "{{ vm_name }}"
+              community.libvirt.virt:
+                name: "{{ vm_name }}"
+                command: start
+              become: yes
+              delegate_to: 127.0.0.1
+
+            - name: wait for connection to become reachable/usable
+              wait_for_connection:
+                delay: 30
+
+            - name: waits until instance is reachable
+              wait_for:
+                host: "{{ ansible_all_ipv4_addresses[0] }}"
+                port: 22
+                search_regex: OpenSSH
+                delay: 10
+              register: result_rollback
+              until: result_rollback is success
+              retries: 6
+              delay: 10
+
+        - assert:
+            that:
+              - result_rollback is succeeded
+            fail_msg: "Rollback failed"
+            success_msg: "Rollback success"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+
+    # case: check ostree commit after rollback
+    - name: check ostree commit after rollback
+      block:
+        - name: check ostree commit after rollback
+          shell: rpm-ostree status --json | jq -r '.deployments[0].checksum'
+          register: result_commit
+
+        - assert:
+            that:
+              - deploy_commit == ostree_commit
+            fail_msg: "Not rollbackto last commit"
+            success_msg: "Rollback success"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+      when: result_rollback is succeeded
+
+    # case: check greenboot* services log again
+    - name: fallback log should be found here
+      block:
+        - name: fallback log should be found here
+          command: journalctl -u greenboot-rollback
+          become: yes
+          register: result_greenboot_log
+
+        - assert:
+            that:
+              - "'Greenboot will now attempt to rollback' in result_greenboot_log.stdout"
+              - "'Rollback successful' in result_greenboot_log.stdout"
+            fail_msg: "Fallback log not found"
+            success_msg: "Found fallback log"
+
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+      when: result_rollback is succeeded
+
+    # case: check grubenv variables again
+    - name: grubenv variables should contain boot_success=1
+      block:
+        - name: grubenv variables should contain boot_success=1
+          command: grub2-editenv list
+          register: result_grubenv
+          become: yes
+
+        - assert:
+            that:
+              - "'boot_success=1' in result_grubenv.stdout"
+            fail_msg: "Not found boot_success=1"
+            success_msg: "Found boot_success=1"
+      always:
+        - set_fact:
+            total_counter: "{{ total_counter | int + 1 }}"
+      rescue:
+        - name: failed count + 1
+          set_fact:
+            failed_counter: "{{ failed_counter | int + 1 }}"
+      when: result_rollback is succeeded
+
+    - assert:
+        that:
+          - failed_counter == "0"
+        fail_msg: "Run {{ total_counter }} tests, but {{ failed_counter }} of them failed"
+        success_msg: "Totally {{ total_counter }} test passed"
