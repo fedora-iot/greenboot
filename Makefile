@@ -16,7 +16,7 @@ else
 endif
 
 .PHONY: all
-all: build test
+all: build check
 
 $(RPM_SPECFILE):
 	mkdir -p $(CURDIR)/rpmbuild/SPECS
@@ -40,8 +40,8 @@ install: build
 	install -D -t ${DESTDIR}/usr/libexec "${TARGETDIR}/${PROFILE}/greenboot"
 	install -D -m 644 -t ${DESTDIR}/usr/lib/systemd/system dist/systemd/system/*.service
 
-.PHONY: test
-test:
+.PHONY: check
+check:
 	cargo test "--target-dir=${TARGETDIR}" -- --test-threads=1
 
 .PHONY: srpm
