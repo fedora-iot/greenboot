@@ -1,0 +1,228 @@
+---
+name: greenboot rs integration test
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  pr-info:
+    if: ${{ github.event.issue.pull_request &&
+            (startsWith(github.event.comment.body, '/greenboot-rs-test-all') ||
+            startsWith(github.event.comment.body, '/greenboot-rs-test-39')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query author repository permissions
+        uses: octokit/request-action@v2.x
+        id: user_permission
+        with:
+          route: GET /repos/${{ github.repository }}/collaborators/${{ github.event.sender.login }}/permission
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # restrict running of tests to users with admin or write permission for the repository
+      # see https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+      - name: Check if user does have correct permissions
+        if: contains('admin write', fromJson(steps.user_permission.outputs.data).permission)
+        id: check_user_perm
+        run: |
+          echo "User '${{ github.event.sender.login }}' has permission '${{ fromJson(steps.user_permission.outputs.data).permission }}' allowed values: 'admin', 'write'"
+          echo "allowed_user=true" >> $GITHUB_OUTPUT
+          
+      - name: Get information for pull request
+        uses: octokit/request-action@v2.x
+        id: pr-api
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    outputs:
+      allowed_user: ${{ steps.check_user_perm.outputs.allowed_user }}
+      sha: ${{ fromJson(steps.pr-api.outputs.data).head.sha }}
+      base_ref: ${{ fromJson(steps.pr-api.outputs.data).base.ref }}
+
+  comment-info:
+    needs: pr-info
+    if: ${{ needs.pr-info.outputs.allowed_user == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR comment analysis
+        id: comment-analysis
+        run: |
+          comment_content="${{ github.event.comment.body }}"
+          comment_array=($comment_content)
+          comment_arg_len=${#comment_array[@]}
+
+          echo ${comment_array[@]}
+          echo $comment_arg_len
+
+          # Default to osbuild and osbuild-composer main branch
+          IMAGES_REPO="osbuild/images"
+          IMAGES_BRANCH="main"
+          OSBUILD_COMPOSER_REPO="osbuild/osbuild-composer"
+          OSBUILD_COMPOSER_BRANCH="main"
+
+          for item in "${comment_array[@]}"; do
+              if [[ "$item" =~ "/images:" ]]; then
+                  IMAGES_REPO="$(echo $item | cut -d: -f1)"
+                  IMAGES_BRANCH="$(echo $item | cut -d: -f2)"
+              fi
+              if [[ "$item" =~ "/osbuild-composer:" ]]; then
+                  OSBUILD_COMPOSER_REPO="$(echo $item | cut -d: -f1)"
+                  OSBUILD_COMPOSER_BRANCH="$(echo $item | cut -d: -f2)"
+              fi
+          done
+
+          echo $IMAGES_REPO
+          echo $IMAGES_BRANCH
+          echo $OSBUILD_COMPOSER_REPO
+          echo $OSBUILD_COMPOSER_BRANCH
+
+          echo "images_repo=$IMAGES_REPO" >> $GITHUB_OUTPUT
+          echo "images_branch=$IMAGES_BRANCH" >> $GITHUB_OUTPUT
+          echo "osbuild-composer_repo=$OSBUILD_COMPOSER_REPO" >> $GITHUB_OUTPUT
+          echo "osbuild-composer_branch=$OSBUILD_COMPOSER_BRANCH" >> $GITHUB_OUTPUT
+
+    outputs:
+      images_repo: ${{ steps.comment-analysis.outputs.images_repo }}
+      images_branch: ${{ steps.comment-analysis.outputs.images_branch }}
+      osbuild-composer_repo: ${{ steps.comment-analysis.outputs.osbuild-composer_repo }}
+      osbuild-composer_branch: ${{ steps.comment-analysis.outputs.osbuild-composer_branch }}
+
+  pre-greenboot-rs-39:
+    needs: pr-info
+    if: ${{ needs.pr-info.outputs.base_ref == 'greenboot-rs' &&
+            needs.pr-info.outputs.allowed_user == 'true' &&
+            (startsWith(github.event.comment.body, '/greenboot-rs-test-all') ||
+            startsWith(github.event.comment.body, '/greenboot-rs-test-39')) }}
+    runs-on: ubuntu-latest
+    env:
+      STATUS_NAME: greenboot-rs-39
+
+    steps:
+      - name: Create in-progress status
+        uses: octokit/request-action@v2.x
+        with:
+          route: 'POST /repos/${{ github.repository }}/statuses/${{ needs.pr-info.outputs.sha }}'
+          context: ${{ env.STATUS_NAME }}
+          state: pending
+          description: 'Deploy runner'
+          target_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  greenboot-rs-39:
+    needs: [pr-info, comment-info, pre-greenboot-rs-39]
+    if: ${{ needs.pr-info.outputs.base_ref == 'greenboot-rs' &&
+            needs.pr-info.outputs.allowed_user == 'true' &&
+            (startsWith(github.event.comment.body, '/greenboot-rs-test-all') ||
+            startsWith(github.event.comment.body, '/greenboot-rs-test-39')) }}
+    runs-on: [kite, x86_64, gcp, fedora-39, large]
+    env:
+      STATUS_NAME: greenboot-rs-39
+
+    steps:
+      - name: Create in-progress status
+        uses: octokit/request-action@v2.x
+        with:
+          route: 'POST /repos/${{ github.repository }}/statuses/${{ needs.pr-info.outputs.sha }}'
+          context: ${{ env.STATUS_NAME }}
+          state: pending
+          target_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install required packages
+        run: sudo dnf install -y make gcc openssl openssl-devel findutils golang git tpm2-tss-devel swtpm swtpm-tools clevis clevis-luks cryptsetup cryptsetup-devel clang-devel cracklib-dicts rust cargo rust-packaging rpmdevtools python3-docutils createrepo_c libassuan-devel krb5-devel gpgme-devel go-rpm-macros
+
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.pr-info.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Build greenboot PRM pakcages
+        run: make rpm
+
+      - name: Prepare greenboot
+        run: |
+          sudo mkdir -p /var/www/html/source
+          sudo cp ./rpmbuild/RPMS/x86_64/* /var/www/html/source/ 2>/dev/null || :
+          sudo createrepo_c /var/www/html/source
+          sudo restorecon -Rv /var/www/html/source
+          sudo ls -al /var/www/html/source
+
+      # Only run when PR has osbuild-composer dependence
+      - name: Checkout images code
+        if: ${{ needs.comment-info.outputs.images_branch != 'main' }} || ${{ needs.comment-info.outputs.osbuild-composer_branch != 'main' }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ needs.comment-info.outputs.images_repo }}
+          ref: ${{ needs.comment-info.outputs.images_branch }}
+          path: images
+
+      # Only run when PR has osbuild-composer dependence
+      - name: Checkout osbuild-composer code
+        if: ${{ needs.comment-info.outputs.osbuild-composer_branch != 'main' }} || ${{ needs.comment-info.outputs.images_branch != 'main' }}
+        run: git clone -b ${{ needs.comment-info.outputs.osbuild-composer_branch }} https://github.com/${{ needs.comment-info.outputs.osbuild-composer_repo }}
+        # uses: actions/checkout@v3
+        # with:
+        #   repository: ${{ needs.comment-info.outputs.osbuild-composer_repo }}
+        #   ref: ${{ needs.comment-info.outputs.osbuild-composer_branch }}
+        #   path: osbuild-composer
+
+      - name: Build osbuild-composer
+        if: ${{ needs.comment-info.outputs.osbuild-composer_branch != 'main' }} || ${{ needs.comment-info.outputs.images_branch != 'main' }}
+        run: |
+          ls -al
+          pwd
+          git status
+          ls -a ../images
+          git -C ../images status
+          go clean -modcache
+          go mod tidy
+          go mod edit -replace github.com/osbuild/images=../images
+          GOPROXY=direct GOSUMDB=off ./tools/prepare-source.sh
+
+          git config --global user.name "greenboot bot"
+          git config --global user.email "greenboot-bot@greenboot.com"
+          git status
+          git add -A
+          git commit -m "new build for greenboot test"
+
+          make rpm
+
+          sudo cp rpmbuild/RPMS/x86_64/* /var/www/html/source/
+          sudo ls -al /var/www/html/source/
+          sudo createrepo_c /var/www/html/source
+          sudo restorecon -Rv /var/www/html/source
+
+          sudo tee "/etc/yum.repos.d/source.repo" > /dev/null << EOF
+          [source]
+          name = source
+          baseurl = file:///var/www/html/source/
+          enabled = 1
+          gpgcheck = 0
+          priority = 5
+          EOF
+
+          sudo dnf info osbuild osbuild-composer
+        working-directory: ./osbuild-composer
+
+      - name: Run greenboot-rs.sh test
+        run: ./greenboot-rs.sh
+        working-directory: tests
+        timeout-minutes: 100
+
+      - name: Set result status
+        if: always()
+        uses: octokit/request-action@v2.x
+        with:
+          route: 'POST /repos/${{ github.repository }}/statuses/${{ needs.pr-info.outputs.sha }}'
+          context: ${{ env.STATUS_NAME }}
+          state: ${{ job.status }}
+          target_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
