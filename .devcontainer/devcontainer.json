@@ -1,0 +1,28 @@
+{
+	"name": "greenboot-rs",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined"
+	],
+	"settings": {
+		"rust-analyzer.checkOnSave.command": "clippy"
+	},
+	"extensions": [
+		"mutantdino.resourcemonitor",
+		"matklad.rust-analyzer",
+		"serayuzgur.crates"
+	],
+	"hostRequirements": {
+		"memory": "4gb"
+	},
+	"remoteUser": "vscode",
+	"updateContentCommand": [
+		"cargo",
+		"build"
+	],
+	"waitFor": "onCreateCommand"
+}
