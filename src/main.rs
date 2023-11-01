@@ -48,14 +48,14 @@ impl GreenbootConfig {
                 config.max_reboot = match c.get_int("GREENBOOT_MAX_BOOT_ATTEMPTS") {
                     Ok(c) => c.try_into().unwrap_or_else(|e| {
                         log::warn!(
-                            "config error:{e}, using default value: {}",
+                            "{e}, config error, using default value: {}",
                             config.max_reboot
                         );
                         config.max_reboot
                     }),
                     Err(e) => {
                         log::warn!(
-                            "error reading config:{e}, using default value: {}",
+                            "{e}, config error, using default value: {}",
                             config.max_reboot
                         );
                         config.max_reboot
@@ -63,7 +63,7 @@ impl GreenbootConfig {
                 }
             }
             Err(e) => log::warn!(
-                "config file error:{e}, using default value: {}",
+                "{e}, config error, using default value: {}",
                 config.max_reboot
             ),
         }
@@ -193,7 +193,7 @@ fn health_check() -> Result<()> {
             set_boot_counter(config.max_reboot)
                 .unwrap_or_else(|e| log::error!("cannot set boot_counter: {}", e.to_string()));
             handle_reboot(false)
-                .unwrap_or_else(|e| log::error!("cannot reboot as: {}", e.to_string()));
+                .unwrap_or_else(|e| log::error!("cannot reboot: {}", e.to_string()));
             Err(e)
         }
     }
