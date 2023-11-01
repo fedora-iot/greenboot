@@ -47,16 +47,25 @@ impl GreenbootConfig {
             Ok(c) => {
                 config.max_reboot = match c.get_int("GREENBOOT_MAX_BOOT_ATTEMPTS") {
                     Ok(c) => c.try_into().unwrap_or_else(|e| {
-                        log::warn!("config format error:{e}, using default value");
+                        log::warn!(
+                            "config error:{e}, using default value: {}",
+                            config.max_reboot
+                        );
                         config.max_reboot
                     }),
                     Err(e) => {
-                        log::warn!("error reading config:{e}, using default value");
+                        log::warn!(
+                            "error reading config:{e}, using default value: {}",
+                            config.max_reboot
+                        );
                         config.max_reboot
                     }
                 }
             }
-            Err(e) => log::warn!("config file error:{e}, using default value"),
+            Err(e) => log::warn!(
+                "config file error:{e}, using default value: {}",
+                config.max_reboot
+            ),
         }
         config
     }
@@ -107,17 +116,14 @@ fn run_diagnostics() -> Result<(), Error> {
             continue;
         }
         path_exists = true;
-        let greenboot_required_path = format!("{greenboot_required_path}*.sh");
-        for entry in glob(&greenboot_required_path)?.flatten() {
-            log::info!("running required check {}", entry.to_string_lossy());
-            let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
-            if !output.status.success() {
-                log::warn!(
-                    "required script {} failed! \n{} \n{}",
-                    entry.to_string_lossy(),
-                    String::from_utf8_lossy(&output.stdout),
-                    String::from_utf8_lossy(&output.stderr)
-                );
+        match run_scripts("required", &greenboot_required_path) {
+            Ok(script_status) => {
+                if !script_status {
+                    script_failure = true;
+                }
+            }
+            Err(e) => {
+                log::warn!("required script runner error: {}", e.to_string());
                 script_failure = true;
             }
         }
@@ -128,20 +134,9 @@ fn run_diagnostics() -> Result<(), Error> {
     }
 
     for path in GREENBOOT_INSTALL_PATHS {
-        let greenboot_wanted_path = format!("{path}/check/wanted.d/*.sh");
-        for entry in glob(&greenboot_wanted_path)?.flatten() {
-            log::info!("running wanted check {}", entry.to_string_lossy());
-            let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
-            if !output.status.success() {
-                log::warn!(
-                    "wanted script {} failed! \n{} \n{}",
-                    entry.to_string_lossy(),
-                    String::from_utf8_lossy(&output.stdout),
-                    String::from_utf8_lossy(&output.stderr)
-                );
-            } else {
-                log::warn!("wanted script {} success!", entry.to_string_lossy());
-            }
+        let greenboot_wanted_path = format!("{path}/check/wanted.d/");
+        if let Some(e) = run_scripts("wanted", &greenboot_wanted_path).err() {
+            log::error!("wanted script runner error:{}", e.to_string());
         }
     }
 
@@ -154,18 +149,9 @@ fn run_diagnostics() -> Result<(), Error> {
 /// runs the scripts in red.d when health-check fails
 fn run_red() -> Result<(), Error> {
     for path in GREENBOOT_INSTALL_PATHS {
-        let red_path = format!("{path}/red.d/*.*");
-        for entry in glob(&red_path)?.flatten() {
-            log::info!("running red check {}", entry.to_string_lossy());
-            let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
-            if !output.status.success() {
-                log::warn!(
-                    "red script {} failed! \n{} \n{}",
-                    entry.to_string_lossy(),
-                    String::from_utf8_lossy(&output.stdout),
-                    String::from_utf8_lossy(&output.stderr)
-                );
-            }
+        let red_path = format!("{path}/red.d/");
+        if let Some(e) = run_scripts("red", &red_path).err() {
+            log::error!("red script runner error: {}", e.to_string());
         }
     }
     Ok(())
@@ -174,50 +160,38 @@ fn run_red() -> Result<(), Error> {
 /// runs the scripts green.d when health-check passes
 fn run_green() -> Result<(), Error> {
     for path in GREENBOOT_INSTALL_PATHS {
-        let green_path = format!("{path}/green.d/*.*");
-        for entry in glob(&green_path)?.flatten() {
-            log::info!("running green check {}", entry.to_string_lossy());
-            let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
-            if !output.status.success() {
-                log::warn!(
-                    "green script {} failed! \n{} \n{}",
-                    entry.to_string_lossy(),
-                    String::from_utf8_lossy(&output.stdout),
-                    String::from_utf8_lossy(&output.stderr)
-                );
-            }
+        let green_path = format!("{path}/green.d/");
+        if let Some(e) = run_scripts("green", &green_path).err() {
+            log::error!("green script runner error: {}", e.to_string());
         }
     }
     Ok(())
 }
 
 /// triggers the diagnostics followed by the action on the outcome
-/// this also handle setting the grub variables and system restart
+/// this also handles setting the grub variables and system restart
 fn health_check() -> Result<()> {
     let config = GreenbootConfig::get_config();
-    log::info!("{config:?}");
+    log::debug!("{config:?}");
     handle_motd("healthcheck is in progress")?;
-    let run_status = run_diagnostics();
-    match run_status {
+    match run_diagnostics() {
         Ok(()) => {
             log::info!("greenboot health-check passed.");
-            run_green().unwrap_or_else(|e| {
-                log::error!("cannot run green script due to: {}", e.to_string())
-            });
+            run_green()
+                .unwrap_or_else(|e| log::error!("cannot run green script: {}", e.to_string()));
             handle_motd("healthcheck passed - status is GREEN")
-                .unwrap_or_else(|e| log::error!("cannot set motd due to : {}", e.to_string()));
-            handle_boot_success(true)?;
+                .unwrap_or_else(|e| log::error!("cannot set motd: {}", e.to_string()));
+            handle_boot_status(true)?;
             Ok(())
         }
         Err(e) => {
             log::error!("Greenboot health-check failed!");
             handle_motd("healthcheck failed - status is RED")
-                .unwrap_or_else(|e| log::error!("cannot set motd due to : {}", e.to_string()));
-            run_red()
-                .unwrap_or_else(|e| log::error!("cannot run red script due to: {}", e.to_string()));
-            handle_boot_success(false)?;
+                .unwrap_or_else(|e| log::error!("cannot set motd: {}", e.to_string()));
+            run_red().unwrap_or_else(|e| log::error!("cannot run red script: {}", e.to_string()));
+            handle_boot_status(false)?;
             set_boot_counter(config.max_reboot)
-                .unwrap_or_else(|e| log::error!("cannot set boot_counter as: {}", e.to_string()));
+                .unwrap_or_else(|e| log::error!("cannot set boot_counter: {}", e.to_string()));
             handle_reboot(false)
                 .unwrap_or_else(|e| log::error!("cannot reboot as: {}", e.to_string()));
             Err(e)
@@ -234,9 +208,32 @@ fn trigger_rollback() -> Result<()> {
             handle_reboot(true)
         }
         Err(e) => {
-            bail!("Rollback not initiated as {}", e);
+            bail!("{e}, Rollback is not initiated");
         }
     }
+}
+
+/// takes in a path and runs all the .sh files within the path
+/// returns false if any script fails
+fn run_scripts(name: &str, path: &str) -> Result<bool> {
+    let mut status = true;
+    let scripts = format!("{path}*.sh");
+    for entry in glob(&scripts)?.flatten() {
+        log::info!("running {name} check {}", entry.to_string_lossy());
+        let output = Command::new("bash").arg("-C").arg(entry.clone()).output()?;
+        if !output.status.success() {
+            status = false;
+            log::warn!(
+                "{name} script {} failed! \n{} \n{}",
+                entry.to_string_lossy(),
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        } else {
+            log::warn!("{name} script {} success!", entry.to_string_lossy());
+        }
+    }
+    Ok(status)
 }
 
 fn main() -> Result<()> {
