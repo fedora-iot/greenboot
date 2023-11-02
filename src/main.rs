@@ -106,7 +106,7 @@ enum Commands {
     Rollback,
 }
 
-/// this runs the scripts in required.d and wanted.d
+/// this runs all the scripts in required.d and wanted.d
 fn run_diagnostics() -> Result<(), Error> {
     let mut script_failure: bool = false;
     let mut path_exists: bool = false;
@@ -299,6 +299,20 @@ mod tests {
         set_boot_counter(10).ok();
         set_boot_counter(20).ok();
         assert_eq!(get_boot_counter(), Some(10));
+        unset_boot_counter().ok();
+    }
+
+    #[test]
+    fn test_boot_counter_having_invalid_value() {
+        unset_boot_counter().ok();
+        let _ = Command::new("grub2-editenv")
+            .arg("-")
+            .arg("set")
+            .arg("boot_counter=foo")
+            .spawn()
+            .context("Cannot create grub variable boot_counter");
+        set_boot_counter(13).ok();
+        assert_eq!(get_boot_counter(), Some(13));
         unset_boot_counter().ok();
     }
 
