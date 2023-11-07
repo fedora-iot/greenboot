@@ -211,9 +211,15 @@ jobs:
           sudo dnf info osbuild osbuild-composer
         working-directory: ./osbuild-composer
 
+      - name: Checkout greenboot ci test code
+        uses: actions/checkout@v3
+        with:
+          repository: yih-redhat/greenboot-ci
+          path: greenboot-ci
+
       - name: Run greenboot-rs.sh test
         run: ./greenboot-rs.sh
-        working-directory: tests
+        working-directory: ./greenboot-ci/tests
         timeout-minutes: 100
 
       - name: Set result status
