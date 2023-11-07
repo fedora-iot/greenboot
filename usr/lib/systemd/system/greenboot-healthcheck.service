@@ -1,0 +1,17 @@
+[Unit]
+Description=greenboot Health Checks Runner
+DefaultDependencies=no
+Before=boot-complete.target systemd-update-done.service
+OnFailureJobMode=fail
+RequiresMountsFor=/boot
+RequiresMountsFor=/etc
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/greenboot/greenboot health-check
+Restart=no
+
+[Install]
+RequiredBy=boot-complete.target
+WantedBy=multi-user.target

@@ -42,7 +42,7 @@ install: build
 
 .PHONY: check
 check:
-	cargo test "--target-dir=${TARGETDIR}"
+	cargo test "--target-dir=${TARGETDIR}" -- --test-threads=1
 
 .PHONY: srpm
 srpm: $(RPM_SPECFILE) $(RPM_TARBALL) $(VENDOR_TARBALL)
