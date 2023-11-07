@@ -1,5 +1,5 @@
 mod handler;
-use anyhow::{bail, Error, Result};
+use anyhow::{bail, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use config::{Config, File, FileFormat};
 use glob::glob;
@@ -107,7 +107,7 @@ enum Commands {
 }
 
 /// this runs all the scripts in required.d and wanted.d
-fn run_diagnostics() -> Result<(), Error> {
+fn run_diagnostics() -> Result<()> {
     let mut script_failure: bool = false;
     let mut path_exists: bool = false;
     for path in GREENBOOT_INSTALL_PATHS {
@@ -147,7 +147,7 @@ fn run_diagnostics() -> Result<(), Error> {
 }
 
 /// runs the scripts in red.d when health-check fails
-fn run_red() -> Result<(), Error> {
+fn run_red() -> Result<()> {
     for path in GREENBOOT_INSTALL_PATHS {
         let red_path = format!("{path}/red.d/");
         if let Some(e) = run_scripts("red", &red_path).err() {
@@ -158,7 +158,7 @@ fn run_red() -> Result<(), Error> {
 }
 
 /// runs the scripts green.d when health-check passes
-fn run_green() -> Result<(), Error> {
+fn run_green() -> Result<()> {
     for path in GREENBOOT_INSTALL_PATHS {
         let green_path = format!("{path}/green.d/");
         if let Some(e) = run_scripts("green", &green_path).err() {
