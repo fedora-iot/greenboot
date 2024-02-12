@@ -19,6 +19,7 @@ BuildRequires:      systemd-rpm-macros
 Requires:           systemd >= 240
 Requires:           grub2-tools-minimal
 Requires:           rpm-ostree
+Requires:           bootupd
 # PAM is required to programatically read motd messages from /etc/motd.d/*
 # This causes issues with RHEL-8 as the fix isn't there an el8 is on pam-1.3.x
 Requires:           pam >= 1.4.0
@@ -65,6 +66,7 @@ mkdir -p %{buildroot}%{_prefix}/lib/%{name}/check/required.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/green.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/red.d
+install -D -t %{buildroot}%{_prefix}/lib/bootupd/grub2-static/configs.d grub2/greenboot.cfg
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
 mkdir -p %{buildroot}%{_tmpfilesdir}
@@ -149,6 +151,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_exec_prefix}/lib/motd.d/boot-status
 %{_libexecdir}/%{name}/greenboot-status
 %{_tmpfilesdir}/greenboot-status-motd.conf
+%{_prefix}/lib/bootupd/grub2-static/configs.d/*.cfg
 %{_unitdir}/greenboot-status.service
 %{_libexecdir}/%{name}/greenboot-grub2-set-counter
 %{_unitdir}/greenboot-grub2-set-success.service
