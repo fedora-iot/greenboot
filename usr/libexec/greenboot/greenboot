@@ -7,6 +7,23 @@ SCRIPTS_CHECK_PATHS=("/usr/lib/greenboot/check" "/etc/greenboot/check")
 SCRIPTS_GREEN_PATHS=("/usr/lib/greenboot/green.d" "/etc/greenboot/green.d")
 SCRIPTS_RED_PATHS=("/usr/lib/greenboot/red.d" "/etc/greenboot/red.d")
 
+source_configuration_file() {
+    greenboot_configuration_file=/etc/greenboot/greenboot.conf
+    if test -f "$greenboot_configuration_file"; then
+	# shellcheck source=/etc/greenboot/greenboot.conf
+        source $greenboot_configuration_file
+    fi
+}
+
+source_configuration_file
+function is_disabled {
+    healthcheck=$1
+    for disabled_healthcheck in "${DISABLED_HEALTHCHECKS[@]}"; do
+        if [ "${healthcheck}" == "${disabled_healthcheck}" ]; then return 0; fi
+    done
+    return 1
+}
+
 script_runner () {
   local scripts_dir=$1; shift
   local mode=$1; shift
@@ -14,21 +31,25 @@ script_runner () {
   local required_hc_failed=false
   echo "$start_msg"
   for script in $(find "$scripts_dir" -name '*.sh' | sort); do
-    local rc=0
-    systemd-cat -t "$(basename "$script")" bash "$script" || rc=$?
-    if [ $rc -ne 0 ]; then
-      local failure_msg
-      failure_msg="Script '$(basename "$script")' FAILURE (exit code '$rc')"
-      case "$mode" in
-        "relaxed")
-          echo "<2>$failure_msg. Continuing..." >&2
-          ;;
-        "strict")
-          required_hc_failed=true
-          echo "<0>$failure_msg. Continuing..." >&2
-      esac
+    if is_disabled "$(basename "$script")"; then
+      echo "'$(basename "$script")' was skipped, as specified in config"
     else
-      echo "<6>Script '$(basename "$script")' SUCCESS"
+      local rc=0
+      systemd-cat -t "$(basename "$script")" bash "$script" || rc=$?
+      if [ $rc -ne 0 ]; then
+        local failure_msg
+        failure_msg="Script '$(basename "$script")' FAILURE (exit code '$rc')"
+        case "$mode" in
+          "relaxed")
+            echo "<2>$failure_msg. Continuing..." >&2
+            ;;
+          "strict")
+            required_hc_failed=true
+            echo "<0>$failure_msg. Continuing..." >&2
+        esac
+      else
+        echo "<6>Script '$(basename "$script")' SUCCESS"
+      fi
     fi
   done
 
