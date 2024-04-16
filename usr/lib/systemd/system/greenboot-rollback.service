@@ -1,0 +1,16 @@
+
+[Unit]
+Description=Greenboot rollback
+Requires=dbus.service
+RequiresMountsFor=/boot
+After=systemd-update-done.service
+BindsTo=systemd-update-done.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/libexec/greenboot/greenboot rollback
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
