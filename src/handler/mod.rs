@@ -32,7 +32,7 @@ pub fn handle_rollback() -> Result<()> {
 }
 
 /// sets grub variable boot_counter if not set
-pub fn set_boot_counter(reboot_count: i32) -> Result<()> {
+pub fn set_boot_counter(reboot_count: u16) -> Result<()> {
     match get_boot_counter() {
         Ok(Some(current_counter)) => {
             log::info!("boot_counter={current_counter}");
@@ -101,7 +101,7 @@ pub fn get_boot_counter() -> Result<Option<i32>> {
 }
 
 /// helper function to set any grub variable
-fn set_grub_var(key: &str, val: i32) -> Result<()> {
+fn set_grub_var(key: &str, val: u16) -> Result<()> {
     Command::new("grub2-editenv")
         .arg("-")
         .arg("set")

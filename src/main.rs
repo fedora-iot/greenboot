@@ -30,7 +30,7 @@ struct Cli {
 #[derive(Debug, Deserialize)]
 ///config params for greenboot
 struct GreenbootConfig {
-    max_reboot: i32,
+    max_reboot: u16,
 }
 
 impl GreenbootConfig {
