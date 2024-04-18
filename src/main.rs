@@ -114,10 +114,12 @@ fn run_diagnostics() -> Result<()> {
     for path in GREENBOOT_INSTALL_PATHS {
         let greenboot_required_path = format!("{path}/check/required.d/");
         if !Path::new(&greenboot_required_path).is_dir() {
+            log::warn!("skipping test as {greenboot_required_path} is not a dir");
             continue;
         }
         path_exists = true;
-        if let Some(errors) = run_scripts("required", &greenboot_required_path).err() {
+        let errors = run_scripts("required", &greenboot_required_path);
+        if !errors.is_empty() {
             log::error!("required script error:");
             errors.iter().for_each(|e| log::error!("{e}"));
             if !required_script_failure {
@@ -130,7 +132,8 @@ fn run_diagnostics() -> Result<()> {
     }
     for path in GREENBOOT_INSTALL_PATHS {
         let greenboot_wanted_path = format!("{path}/check/wanted.d/");
-        if let Some(errors) = run_scripts("wanted", &greenboot_wanted_path).err() {
+        let errors = run_scripts("wanted", &greenboot_wanted_path);
+        if !errors.is_empty() {
             log::warn!("wanted script runner error:");
             errors.iter().for_each(|e| log::error!("{e}"));
         }
@@ -143,35 +146,29 @@ fn run_diagnostics() -> Result<()> {
 }
 
 /// runs all the scripts in red.d when health-check fails
-fn run_red() -> Result<(), Vec<Box<dyn Error>>> {
+fn run_red() -> Vec<Box<dyn Error>> {
     let mut errors = Vec::new();
     for path in GREENBOOT_INSTALL_PATHS {
         let red_path = format!("{path}/red.d/");
-        if let Some(e) = run_scripts("red", &red_path).err() {
+        let e = run_scripts("red", &red_path);
+        if !e.is_empty() {
             errors.extend(e);
         }
     }
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+    errors
 }
 
 /// runs all the scripts green.d when health-check passes
-fn run_green() -> Result<(), Vec<Box<dyn Error>>> {
+fn run_green() -> Vec<Box<dyn Error>> {
     let mut errors = Vec::new();
     for path in GREENBOOT_INSTALL_PATHS {
         let green_path = format!("{path}/green.d/");
-        if let Some(e) = run_scripts("green", &green_path).err() {
+        let e = run_scripts("green", &green_path);
+        if !e.is_empty() {
             errors.extend(e);
         }
     }
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+    errors
 }
 
 /// triggers the diagnostics followed by the action on the outcome
@@ -183,24 +180,27 @@ fn health_check() -> Result<()> {
     match run_diagnostics() {
         Ok(()) => {
             log::info!("greenboot health-check passed.");
-            run_green().unwrap_or_else(|errors| {
+            let errors = run_green();
+            if !errors.is_empty() {
                 log::error!("There is a problem with green script runner");
                 errors.iter().for_each(|e| log::error!("{e}"));
-            });
+            }
             handle_motd("healthcheck passed - status is GREEN")
                 .unwrap_or_else(|e| log::error!("cannot set motd: {}", e.to_string()));
-            handle_boot_status(true)?;
+            set_boot_status(true)?;
             Ok(())
         }
         Err(e) => {
             log::error!("Greenboot error: {e}");
             handle_motd("healthcheck failed - status is RED")
                 .unwrap_or_else(|e| log::error!("cannot set motd: {}", e.to_string()));
-            run_red().unwrap_or_else(|errors| {
+            let errors = run_red();
+            if !errors.is_empty() {
                 log::error!("There is a problem with red script runner");
                 errors.iter().for_each(|e| log::error!("{e}"));
-            });
-            handle_boot_status(false)?;
+            }
+
+            set_boot_status(false)?;
             set_boot_counter(config.max_reboot)
                 .unwrap_or_else(|e| log::error!("cannot set boot_counter: {}", e.to_string()));
             handle_reboot(false)
@@ -226,7 +226,7 @@ fn trigger_rollback() -> Result<()> {
 
 /// takes in a path and runs all the .sh files within the path
 /// returns false if any script fails
-fn run_scripts(name: &str, path: &str) -> Result<(), Vec<Box<dyn Error>>> {
+fn run_scripts(name: &str, path: &str) -> Vec<Box<dyn Error>> {
     let mut errors = Vec::new();
     let scripts = format!("{path}*.sh");
     match glob(&scripts) {
@@ -258,11 +258,7 @@ fn run_scripts(name: &str, path: &str) -> Result<(), Vec<Box<dyn Error>>> {
         }
         Err(e) => errors.push(Box::new(e) as Box<dyn Error>),
     }
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+    errors
 }
 
 fn main() -> Result<()> {

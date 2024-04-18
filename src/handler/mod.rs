@@ -58,7 +58,7 @@ pub fn unset_boot_counter() -> Result<()> {
 }
 
 /// sets grub variable boot_success
-pub fn handle_boot_status(success: bool) -> Result<()> {
+pub fn set_boot_status(success: bool) -> Result<()> {
     if success {
         set_grub_var("boot_success", 1)?;
         unset_boot_counter()?;
