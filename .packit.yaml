@@ -19,6 +19,8 @@ srpm_build_deps:
 #   post-upstream-clone: "./tools/rpm_spec_add_provides_bundle.sh"
 
 actions:
+  get-current-version:
+  - grep -oP '^Version:\s+\K\S+' greenboot.spec
   create-archive:
   - "cargo vendor vendor"
   - bash -c "git archive --prefix=greenboot-${PACKIT_PROJECT_VERSION}/ --format=tar HEAD > greenboot-${PACKIT_PROJECT_VERSION}.tar"
