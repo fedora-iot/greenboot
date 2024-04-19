@@ -19,7 +19,6 @@ static GREENBOOT_CONFIG_FILE: &str = "/etc/greenboot/greenboot.conf";
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 #[clap(propagate_version = true)]
-
 /// cli parameters for greenboot
 struct Cli {
     #[clap(value_enum, short, long, default_value_t = LogLevel::Info)]
@@ -28,7 +27,7 @@ struct Cli {
     command: Commands,
 }
 #[derive(Debug, Deserialize)]
-///config params for greenboot
+/// config params for greenboot
 struct GreenbootConfig {
     max_reboot: u16,
 }
@@ -128,7 +127,7 @@ fn run_diagnostics() -> Result<()> {
         }
     }
     if !path_exists {
-        bail!("required.d not found");
+        bail!("cannot find any required.d folder");
     }
     for path in GREENBOOT_INSTALL_PATHS {
         let greenboot_wanted_path = format!("{path}/check/wanted.d/");
@@ -281,12 +280,12 @@ mod tests {
 
     use super::*;
 
-    ///validate when the required folder is not found
+    /// validate when the required folder is not found
     #[test]
     fn missing_required_folder() {
         assert_eq!(
             run_diagnostics().unwrap_err().to_string(),
-            String::from("required.d not found")
+            String::from("cannot find any required.d folder")
         );
     }
 

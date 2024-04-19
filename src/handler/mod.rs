@@ -1,6 +1,6 @@
 /// This module contains most of the low-level commands
 /// and grub variable modifications
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Ok, Result};
 
 use std::process::Command;
 use std::str;
@@ -8,11 +8,10 @@ use std::str;
 /// reboots the system if boot_counter is greater than 0 or can be forced too
 pub fn handle_reboot(force: bool) -> Result<()> {
     if !force {
-        if let Some(t) = get_boot_counter()? {
-            if t <= 0 {
-                bail!("countdown ended, check greenboot-rollback status")
-            };
-        }
+        let boot_counter = get_boot_counter()?;
+        if boot_counter <= Some(0) {
+            bail!("countdown ended, check greenboot-rollback status")
+        };
     }
     log::info!("restarting the system");
     Command::new("systemctl").arg("reboot").status()?;
@@ -21,21 +20,21 @@ pub fn handle_reboot(force: bool) -> Result<()> {
 
 /// rollback to previous ostree deployment if boot counter is less than 0
 pub fn handle_rollback() -> Result<()> {
-    if let Some(boot_counter) = get_boot_counter()? {
-        if boot_counter <= 0 {
-            log::info!("Greenboot will now attempt to rollback");
-            Command::new("rpm-ostree").arg("rollback").status()?;
-            return Ok(());
-        }
+    let boot_counter = get_boot_counter()?;
+    if boot_counter <= Some(0) {
+        log::info!("Greenboot will now attempt to rollback");
+        Command::new("rpm-ostree").arg("rollback").status()?;
+        return Ok(());
     }
     bail!("Rollback not initiated");
 }
 
 /// sets grub variable boot_counter if not set
 pub fn set_boot_counter(reboot_count: u16) -> Result<()> {
-    match get_boot_counter() {
-        Ok(Some(current_counter)) => {
-            log::info!("boot_counter={current_counter}");
+    let current_counter = get_boot_counter()?;
+    match current_counter {
+        Some(counter) => {
+            log::info!("boot_counter={counter}");
             bail!("counter already set");
         }
         _ => {
@@ -62,10 +61,9 @@ pub fn set_boot_status(success: bool) -> Result<()> {
     if success {
         set_grub_var("boot_success", 1)?;
         unset_boot_counter()?;
-    } else {
-        set_grub_var("boot_success", 0)?;
+        return Ok(());
     }
-    Ok(())
+    set_grub_var("boot_success", 0)
 }
 
 /// writes greenboot status to motd.d/boot-status
@@ -73,8 +71,8 @@ pub fn handle_motd(state: &str) -> Result<()> {
     std::fs::write(
         "/etc/motd.d/boot-status",
         format!("Greenboot {state}.").as_bytes(),
-    )?;
-    Ok(())
+    )
+    .map_err(|err| anyhow!("Error writing motd: {}", err))
 }
 
 /// fetches boot_counter value, none if not set
@@ -94,8 +92,8 @@ pub fn get_boot_counter() -> Result<Option<i32>> {
             continue;
         }
 
-        let counter_value = v.parse::<i32>()?;
-        return Ok(Some(counter_value));
+        let counter_value = v.parse::<i32>().ok();
+        return Ok(counter_value);
     }
     Ok(None)
 }
