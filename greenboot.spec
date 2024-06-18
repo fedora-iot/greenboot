@@ -2,7 +2,7 @@
 
 Name:               greenboot
 Version:            0.15.5
-Release:            1%{?dist}
+Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
 
@@ -124,16 +124,15 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %systemd_postun greenboot-loading-message.service
 
 %files
-%doc README.md
 %license LICENSE
-%dir %{_libexecdir}/%{name}
-%{_libexecdir}/%{name}/%{name}
-%{_libexecdir}/%{name}/greenboot-loading-message
-%{_unitdir}/greenboot-healthcheck.service
-%{_unitdir}/greenboot-loading-message.service
-%{_unitdir}/greenboot-task-runner.service
-%{_unitdir}/redboot-task-runner.service
-%{_unitdir}/redboot.target
+%doc README.md
+%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/%{name}/check
+%dir %{_sysconfdir}/%{name}/check/required.d
+%dir %{_sysconfdir}/%{name}/check/wanted.d
+%dir %{_sysconfdir}/%{name}/green.d
+%dir %{_sysconfdir}/%{name}/red.d
+%config(noreplace) %{_sysconfdir}/%{name}/greenboot.conf
 %dir %{_prefix}/lib/%{name}
 %dir %{_prefix}/lib/%{name}/check
 %dir %{_prefix}/lib/%{name}/check/required.d
@@ -142,27 +141,28 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/wanted.d/00_wanted_scripts_start.sh
 %dir %{_prefix}/lib/%{name}/green.d
 %dir %{_prefix}/lib/%{name}/red.d
-%dir %{_sysconfdir}/%{name}
-%dir %{_sysconfdir}/%{name}/check
-%dir %{_sysconfdir}/%{name}/check/required.d
-%dir %{_sysconfdir}/%{name}/check/wanted.d
-%dir %{_sysconfdir}/%{name}/green.d
-%dir %{_sysconfdir}/%{name}/red.d
 %{_exec_prefix}/lib/motd.d/boot-status
-%{_libexecdir}/%{name}/greenboot-status
 %{_tmpfilesdir}/greenboot-status-motd.conf
 %{_prefix}/lib/bootupd/grub2-static/configs.d/*.cfg
-%{_unitdir}/greenboot-status.service
-%{_libexecdir}/%{name}/greenboot-grub2-set-counter
+%dir %{_libexecdir}/%{name}
+%{_libexecdir}/%{name}/%{name}
 %{_libexecdir}/%{name}/greenboot-grub2-set-success
 %{_libexecdir}/%{name}/greenboot-boot-remount
-%{_unitdir}/greenboot-grub2-set-success.service
-%{_unitdir}/greenboot-grub2-set-counter.service
+%{_libexecdir}/%{name}/greenboot-grub2-set-counter
+%{_libexecdir}/%{name}/greenboot-loading-message
+%{_libexecdir}/%{name}/greenboot-status
 %{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback
-%{_unitdir}/greenboot-rpm-ostree-grub2-check-fallback.service
 %{_libexecdir}/%{name}/redboot-auto-reboot
+%{_unitdir}/greenboot-grub2-set-counter.service
+%{_unitdir}/greenboot-grub2-set-success.service
+%{_unitdir}/greenboot-healthcheck.service
+%{_unitdir}/greenboot-loading-message.service
+%{_unitdir}/greenboot-status.service
+%{_unitdir}/greenboot-task-runner.service
+%{_unitdir}/greenboot-rpm-ostree-grub2-check-fallback.service
+%{_unitdir}/redboot.target
 %{_unitdir}/redboot-auto-reboot.service
-%{_sysconfdir}/%{name}/greenboot.conf
+%{_unitdir}/redboot-task-runner.service
 
 %files default-health-checks
 %{_prefix}/lib/%{name}/check/required.d/01_repository_dns_check.sh
@@ -171,6 +171,10 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+
+* Tue Jun 18 2024 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.5-2
+- Reorder files, don't overwrite configs on update
+
 * Fri Aug 16 2024 saypaul <paul.sayan@gmail.com> - 0.15.5-1
 - The 0.15.5 release
 - Auto-detect image type and use correct rollback
