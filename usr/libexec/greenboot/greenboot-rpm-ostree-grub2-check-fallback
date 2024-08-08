@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+source /usr/libexec/greenboot/greenboot-boot-remount
+
 # Determine if the current boot is a fallback boot
 # If booted into fallback deployment, clean up bootloader entries (rollback)
 if grub2-editenv list | grep -q "^boot_counter=-1$"; then
@@ -12,5 +14,15 @@ if grub2-editenv list | grep -q "^boot_counter=-1$"; then
     echo "<3>Health check logs from previous boot:"
     echo "<3>$prev_logs"
   fi
-  grub2-editenv - unset boot_counter
+
+remount_boot_rw
+
+  if ! /usr/bin/grub2-editenv - unset boot_counter; then
+    # If the above command fails, remount /boot as read-only and exit with failure
+    remount_boot_ro
+    exit 1
+  fi
 fi
+
+# Remount /boot as read-only if it was mounted as read-write
+remount_boot_ro
