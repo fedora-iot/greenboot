@@ -3,13 +3,32 @@ set -euo pipefail
 
 source /usr/libexec/greenboot/greenboot-boot-remount
 
+function attempt_rollback {
+  # Check if the bootc command is available
+  if command -v bootc &> /dev/null; then
+      status_type=$(bootc status --booted --json 2>/dev/null | jq -r .status.type 2>/dev/null)
+      if [ "$status_type" == "bootcHost" ]; then
+          bootc rollback
+          echo "<3>FALLBACK BOOT DETECTED! Default bootc deployment has been rolled back."
+      fi
+      return
+  fi
+  # Check if its ostree based os
+  if [ -f /run/ostree-booted ]; then
+    rpm-ostree rollback
+    echo "<3>FALLBACK BOOT DETECTED! Default rpm-ostree deployment has been rolled back."
+    return
+  fi
+  echo "<3>Rollback is only supported in ostree or bootc based os."
+  return
+}
+
 # Determine if the current boot is a fallback boot
 # If booted into fallback deployment, clean up bootloader entries (rollback)
 if grub2-editenv list | grep -q "^boot_counter=-1$"; then
   # Logs from previous boot may be unavailable on systems without internal RTC; defaulting to empty string
   prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)" || true
-  rpm-ostree rollback
-  echo "<3>FALLBACK BOOT DETECTED! Default rpm-ostree deployment has been rolled back."
+  attempt_rollback
   if [ -n "$prev_logs" ]; then
     echo "<3>Health check logs from previous boot:"
     echo "<3>$prev_logs"
