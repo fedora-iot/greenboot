@@ -18,6 +18,7 @@ RequiresMountsFor=/boot
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/libexec/greenboot/greenboot-grub2-set-counter
+PrivateMounts=yes
 
 [Install]
 RequiredBy=ostree-finalize-staged.service

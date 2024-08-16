@@ -154,6 +154,8 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/bootupd/grub2-static/configs.d/*.cfg
 %{_unitdir}/greenboot-status.service
 %{_libexecdir}/%{name}/greenboot-grub2-set-counter
+%{_libexecdir}/%{name}/greenboot-grub2-set-success
+%{_libexecdir}/%{name}/greenboot-boot-remount
 %{_unitdir}/greenboot-grub2-set-success.service
 %{_unitdir}/greenboot-grub2-set-counter.service
 %{_libexecdir}/%{name}/greenboot-rpm-ostree-grub2-check-fallback

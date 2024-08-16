@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
+source /usr/libexec/greenboot/greenboot-boot-remount
+
 GREENBOOT_CONFIGURATION_FILE=/etc/greenboot/greenboot.conf
 if test -f "$GREENBOOT_CONFIGURATION_FILE"; then
     # shellcheck source=etc/greenboot/greenboot.conf
@@ -14,7 +16,23 @@ elif [ -n "$GREENBOOT_MAX_BOOT_ATTEMPTS" ]; then
 else
     max_boot_attempts=3 # default to 3 attempts
 fi
-grub2-editenv - set boot_counter="$max_boot_attempts"
-grub2-editenv - set boot_success=0
+
+
+remount_boot_rw
+
+if ! /usr/bin/grub2-editenv - set boot_counter="$max_boot_attempts"; then
+ # If the first command fails, remount /boot as read-only and exit with failure
+    remount_boot_ro
+    exit 1
+fi
+
+if ! /usr/bin/grub2-editenv /boot/grub2/grubenv set boot_success=0; then
+    # If the first command fails, remount /boot as read-only and exit with failure
+    remount_boot_ro
+    exit 1
+fi
+
+# Revert /boot as read-only
+remount_boot_ro
 
 echo "<3>GRUB2 environment variables have been set for system upgrade. Max boot attempts is $max_boot_attempts"

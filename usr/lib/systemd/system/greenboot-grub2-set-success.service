@@ -15,8 +15,8 @@ After=boot-complete.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/grub2-editenv - set boot_success=1
-ExecStart=/usr/bin/grub2-editenv - unset boot_counter
+ExecStart=/usr/libexec/greenboot/greenboot-grub2-set-success
+PrivateMounts=yes
 
 [Install]
 WantedBy=multi-user.target
