@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.15.4
+Version:            0.15.5
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPLv2+
@@ -171,6 +171,13 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Fri Aug 16 2024 saypaul <paul.sayan@gmail.com> - 0.15.5-1
+- The 0.15.5 release
+- Auto-detect image type and use correct rollback
+- Support for read only /boot mount
+- Warn users of missing disabled healthchecks
+- Add feature to disable healthchecks
+
 * Fri Feb 17 2023 Paul Whalen <pwhalen@fedoraproject.org> - 0.15.4-1
 - The 0.15.4 release
 - Fix update_platforms_check script 
