@@ -6,6 +6,7 @@ files_to_sync:
   - .packit.yaml
 upstream_package_name: greenboot
 upstream_tag_template: v{version}
+copy_upstream_release_description: true
 downstream_package_name: greenboot
 
 jobs:

@@ -4,7 +4,7 @@ Name:               greenboot
 Version:            0.15.5
 Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
-License:            LGPLv2+
+License:            LGPL-2.1-or-later
 
 %global repo_owner  fedora-iot
 %global repo_name   %{name}
@@ -171,8 +171,7 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
-
-* Tue Jun 18 2024 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.5-2
+* Thu Aug 22 2024 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.5-2
 - Reorder files, don't overwrite configs on update
 
 * Fri Aug 16 2024 saypaul <paul.sayan@gmail.com> - 0.15.5-1
