@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.15.5
-Release:            3%{?dist}
+Version:            0.15.6
+Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
 
@@ -176,6 +176,9 @@ fi
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Tue Sep 10 2024 Paul Whalen <pwhalen@fedoraproject.org> - 0.15.6-1
+- Update to 0.15.6
+
 * Tue Sep 10 2024 Paul Whalen <pwhalen@fedoraproject.org> - 0.15.5-3
 - Moved greenboot config to /etc/grub.d.
 - %post symlink greenboot.cfg to bootupd if present
