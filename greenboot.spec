@@ -176,6 +176,11 @@ fi
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Tue Sep 10 2024 Paul Whalen <pwhalen@fedoraproject.org> - 0.15.5-3
+- Moved greenboot config to /etc/grub.d.
+- %post symlink greenboot.cfg to bootupd if present
+- %postun remove symlink from bootupd if present
+
 * Thu Aug 22 2024 Peter Robinson <pbrobinson@fedoraproject.org> - 0.15.5-2
 - Reorder files, don't overwrite configs on update
 
