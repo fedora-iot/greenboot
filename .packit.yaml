@@ -13,8 +13,8 @@ jobs:
   - job: copr_build
     trigger: pull_request
     targets:
-    - fedora-all
-  
+      - fedora-development
+      - fedora-latest-stable
 
   - job: sync_from_downstream
     trigger: commit
@@ -22,19 +22,23 @@ jobs:
   - job: propose_downstream
     trigger: release
     dist_git_branches:
-      - fedora-all
+      - fedora-development
+      - fedora-latest-stable
 
   - job: tests
     trigger: pull_request
     targets:
-      - fedora-all
+      - fedora-development
+      - fedora-latest-stable
 
   - job: koji_build
     trigger: commit
     dist_git_branches:
-      - fedora-all
+      - fedora-development
+      - fedora-latest-stable
 
   - job: bodhi_update
     trigger: commit
     dist_git_branches:
-      - fedora-all
+      - fedora-development
+      - fedora-latest-stable
