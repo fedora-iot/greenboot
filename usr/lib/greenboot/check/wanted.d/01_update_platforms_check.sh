@@ -5,7 +5,7 @@ REPOS_DIRECTORY=/etc/ostree/remotes.d
 URLS_WITH_PROBLEMS=()
 
 get_update_platform_urls() {
-    mapfile -t UPDATE_PLATFORM_URLS < <(grep -P -ho 'http[s]?.*' "${REPOS_DIRECTORY}"/*)
+    mapfile -t UPDATE_PLATFORM_URLS < <(ostree remote list | xargs ostree remote show-url)
     if [[ ${#UPDATE_PLATFORM_URLS[@]} -eq 0 ]]; then
         echo "No update platforms found, this can be a mistake"
         exit 1
