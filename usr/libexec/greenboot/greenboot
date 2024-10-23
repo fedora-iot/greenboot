@@ -27,7 +27,7 @@ source_configuration_file
 function print_unexecuted_checks {
     for disabled_healthcheck in "${DISABLED_HEALTHCHECKS[@]}"; do
 	if [[  "${DIS_CHECK_STATUS[$disabled_healthcheck]}" == 1 ]]; then
-    	    echo "WARNING: $disabled_healthcheck was not found and may be misspelled"
+           echo "WARNING: $disabled_healthcheck wasn't executed because it's disabled"
 	fi
     done
 }
