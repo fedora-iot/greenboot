@@ -1,0 +1,37 @@
+---
+name: Greenboot Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  fedora-41-bootc-qcow2:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get information for pull request
+        uses: octokit/request-action@v2.x
+        id: pr-api
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run the tests
+        uses: sclorg/testing-farm-as-github-action@v3.1.2
+        with:
+          compose: Fedora-41
+          api_key: ${{ secrets.TF_API_KEY }}
+          git_url: ${{ fromJson(steps.pr-api.outputs.data).head.repo.html_url }}
+          git_ref: ${{ fromJson(steps.pr-api.outputs.data).head.ref }}
+          github_token: ${{ secrets.PAT }}
+          update_pull_request_status: true
+          pull_request_status_name: "f41-bootc-qcow2"
+          tmt_context: "arch=x86_64;distro=fedora-41"
+          tmt_plan_regex: bootc-qcow2
+          tf_scope: private
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
+          variables: "ARCH=x86_64"
+          timeout: 90
