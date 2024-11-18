@@ -63,7 +63,6 @@ check_result () {
         greenprint "💚 Success"
     else
         greenprint "❌ Failed"
-        clean_up
         exit 1
     fi
 }
@@ -84,7 +83,8 @@ wait_for_ssh_up () {
 ##
 ###########################################################
 greenprint "Installing required packages"
-sudo dnf install -y podman qemu-img firewalld qemu-kvm libvirt-client libvirt-daemon-kvm libvirt-daemon virt-install rpmdevtools
+sudo dnf install -y podman qemu-img firewalld qemu-kvm libvirt-client libvirt-daemon-kvm libvirt-daemon virt-install rpmdevtools ansible-core
+ansible-galaxy collection install community.general
 
 # Start firewalld
 greenprint "Start firewalld"
@@ -288,7 +288,7 @@ sudo ssh "${SSH_OPTIONS[@]}" -i "${SSH_KEY}" ${EDGE_USER}@${GUEST_ADDRESS} "echo
 sudo ssh "${SSH_OPTIONS[@]}" -i "${SSH_KEY}" ${EDGE_USER}@${GUEST_ADDRESS} "echo ${EDGE_USER_PASSWORD} |nohup sudo -S systemctl reboot &>/dev/null & exit"
 
 # Wait vm to finish the fallback
-sleep 300
+sleep 240
 
 # Check for ssh ready to go.
 greenprint "🛃 Checking for SSH is ready to go"
@@ -318,8 +318,7 @@ ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
 # Test greenboot functionality
-podman run --annotation run.oci.keep_original_groups=1 -v "$(pwd)":/work:z -v "${TEMPDIR}":/tmp:z \
-    --rm quay.io/rhel-edge/ansible-runner:latest ansible-playbook -v -i /tmp/inventory greenboot-bootc.yaml || RESULTS=0
+ansible-playbook -v -i /${TEMPDIR}/inventory greenboot-bootc.yaml || RESULTS=0
 
 # Test result checking
 check_result
