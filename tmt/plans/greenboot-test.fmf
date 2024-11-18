@@ -1,0 +1,18 @@
+summary: Greenboot test plan
+discover:
+  how: fmf
+  test: greenboot-test
+execute:
+  how: tmt
+provision:
+  hardware:
+    virtualization:
+      is-supported: true
+    cpu:
+      processors: ">= 2"
+    memory: ">= 6 GB"
+
+/bootc-qcow2:
+  summary: Test greenboot with bootc qcow2 image
+  environment+:
+    TEST_CASE: bootc-qcow2

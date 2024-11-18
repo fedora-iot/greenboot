@@ -25,12 +25,6 @@ jobs:
       - fedora-development
       - fedora-latest-stable
 
-  - job: tests
-    trigger: pull_request
-    targets:
-      - fedora-development
-      - fedora-latest-stable
-
   - job: koji_build
     trigger: commit
     dist_git_branches:
