@@ -287,8 +287,8 @@ greenprint "Bootc upgrade and reboot"
 sudo ssh "${SSH_OPTIONS[@]}" -i "${SSH_KEY}" ${EDGE_USER}@${GUEST_ADDRESS} "echo ${EDGE_USER_PASSWORD} |sudo -S bootc upgrade"
 sudo ssh "${SSH_OPTIONS[@]}" -i "${SSH_KEY}" ${EDGE_USER}@${GUEST_ADDRESS} "echo ${EDGE_USER_PASSWORD} |nohup sudo -S systemctl reboot &>/dev/null & exit"
 
-# Sleep 10 seconds here to make sure vm restarted already
-sleep 180
+# Wait vm to finish the fallback
+sleep 300
 
 # Check for ssh ready to go.
 greenprint "🛃 Checking for SSH is ready to go"
