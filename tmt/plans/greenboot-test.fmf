@@ -16,3 +16,8 @@ provision:
   summary: Test greenboot with bootc qcow2 image
   environment+:
     TEST_CASE: bootc-qcow2
+
+/bootc-anaconda-iso:
+  summary: Test greenboot with bootc anaconda iso
+  environment+:
+    TEST_CASE: bootc-anaconda-iso
