@@ -2,7 +2,7 @@
 name: Greenboot Test
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Query author repository permissions
+        uses: octokit/request-action@v2.x
+        id: user_permission
+        with:
+          route: GET /repos/${{ github.repository }}/collaborators/${{ github.event.sender.login }}/permission
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if user does have correct permissions
+        if: contains('admin write', fromJson(steps.user_permission.outputs.data).permission)
+        id: check_user_perm
+        run: |
+          echo "User '${{ github.event.sender.login }}' has permission '${{ fromJson(steps.user_permission.outputs.data).permission }}' allowed values: 'admin', 'write'"
+          echo "allowed_user=true" >> $GITHUB_OUTPUT
+
       - name: Get information for pull request
         uses: octokit/request-action@v2.x
         id: pr-api
@@ -20,6 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run the tests
+        if: ${{ fromJson(steps.check_user_perm.outputs.data).allowed_user == 'true' }}
         uses: sclorg/testing-farm-as-github-action@v3.1.2
         with:
           compose: Fedora-41
