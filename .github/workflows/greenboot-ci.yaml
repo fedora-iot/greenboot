@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run the tests
-        if: ${{ fromJson(steps.check_user_perm.outputs.data).allowed_user == 'true' }}
+        if: ${{ steps.check_user_perm.outputs.allowed_user == 'true' }}
         uses: sclorg/testing-farm-as-github-action@v3.1.2
         with:
           compose: Fedora-41
