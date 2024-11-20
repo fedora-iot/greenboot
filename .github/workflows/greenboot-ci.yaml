@@ -26,7 +26,6 @@ jobs:
           api_key: ${{ secrets.TF_API_KEY }}
           git_url: ${{ fromJson(steps.pr-api.outputs.data).head.repo.html_url }}
           git_ref: ${{ fromJson(steps.pr-api.outputs.data).head.ref }}
-          github_token: ${{ secrets.PAT }}
           update_pull_request_status: true
           pull_request_status_name: "f41-bootc"
           tmt_context: "arch=x86_64;distro=fedora-41"
@@ -35,4 +34,3 @@ jobs:
           secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
           variables: "ARCH=x86_64"
           timeout: 90
-
