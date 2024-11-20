@@ -37,6 +37,11 @@ case "${ID}-${VERSION_ID}" in
         BASE_IMAGE_URL="quay.io/fedora/fedora-bootc:41"
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
         ;;
+    "fedora-rawhide")
+        OS_VARIANT="fedora-unknown"
+        BASE_IMAGE_URL="quay.io/fedora/fedora-bootc:rawhide"
+        BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        ;;
     "centos-9")
         OS_VARIANT="centos-stream9"
         BASE_IMAGE_URL="quay.io/centos-bootc/centos-bootc:stream9"
