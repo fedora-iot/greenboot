@@ -2,7 +2,7 @@
 name: Greenboot Test
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Query author repository permissions
+        uses: octokit/request-action@v2.x
+        id: user_permission
+        with:
+          route: GET /repos/${{ github.repository }}/collaborators/${{ github.event.sender.login }}/permission
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if user does have correct permissions
+        if: contains('admin write', fromJson(steps.user_permission.outputs.data).permission)
+        id: check_user_perm
+        run: |
+          echo "User '${{ github.event.sender.login }}' has permission '${{ fromJson(steps.user_permission.outputs.data).permission }}' allowed values: 'admin', 'write'"
+          echo "allowed_user=true" >> $GITHUB_OUTPUT
+
       - name: Get information for pull request
         uses: octokit/request-action@v2.x
         id: pr-api
@@ -20,13 +35,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run the tests
+        if: ${{ steps.check_user_perm.outputs.allowed_user == 'true' }}
         uses: sclorg/testing-farm-as-github-action@v3.1.2
         with:
           compose: Fedora-41
           api_key: ${{ secrets.TF_API_KEY }}
           git_url: ${{ fromJson(steps.pr-api.outputs.data).head.repo.html_url }}
           git_ref: ${{ fromJson(steps.pr-api.outputs.data).head.ref }}
-          github_token: ${{ secrets.PAT }}
           update_pull_request_status: true
           pull_request_status_name: "f41-bootc"
           tmt_context: "arch=x86_64;distro=fedora-41"
@@ -35,4 +50,3 @@ jobs:
           secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
           variables: "ARCH=x86_64"
           timeout: 90
-
