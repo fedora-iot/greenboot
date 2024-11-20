@@ -188,7 +188,7 @@ RUN dnf install -y \
 # Clean up by removing the local RPMs if desired
 RUN rm -f /tmp/greenboot-*.rpm
 EOF
-podman build  --retry=5 --retry-delay=10 -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
+podman build  --retry=5 --retry-delay=10s -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
 greenprint "Pushing greenboot-bootc container to quay.io"
 podman push quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 
