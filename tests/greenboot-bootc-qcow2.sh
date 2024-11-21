@@ -279,7 +279,7 @@ tee Containerfile > /dev/null << EOF
 FROM quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 RUN dnf install -y https://kite-webhook-prod.s3.amazonaws.com/greenboot-failing-unit-1.0-1.el8.noarch.rpm
 EOF
-podman build  --retry=5 --retry-delay=10 -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
+podman build  --retry=5 --retry-delay=10s -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
 greenprint "Pushing upgrade container to quay.io"
 podman push quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 
