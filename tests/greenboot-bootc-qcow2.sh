@@ -36,21 +36,25 @@ case "${ID}-${VERSION_ID}" in
         OS_VARIANT="fedora-unknown"
         BASE_IMAGE_URL="quay.io/fedora/fedora-bootc:41"
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        BOOT_ARGS="uefi"
         ;;
     "fedora-42")
         OS_VARIANT="fedora-unknown"
         BASE_IMAGE_URL="quay.io/fedora/fedora-bootc:42"
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        BOOT_ARGS="uefi"
         ;;
     "centos-9")
         OS_VARIANT="centos-stream9"
         BASE_IMAGE_URL="quay.io/centos-bootc/centos-bootc:stream9"
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
         ;;
     "rhel-9.6")
         OS_VARIANT="rhel9-unknown"
         BASE_IMAGE_URL="registry.stage.redhat.io/rhel9/rhel-bootc:9.6"
         BIB_URL="registry.stage.redhat.io/rhel9/bootc-image-builder:9.6"
+        BOOT_ARGS="uefi"
         ;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
@@ -172,7 +176,7 @@ cp rpmbuild/RPMS/x86_64/*.rpm tests/ && popd
 ## Build bootc container with greenboot installed
 ##
 ###########################################################
-greenprint "Building rhel-edge-bootc container"
+greenprint "Building bootc container with greenboot installed"
 podman login quay.io -u ${QUAY_USERNAME} -p ${QUAY_PASSWORD}
 podman login registry.stage.redhat.io -u ${STAGE_REDHAT_IO_USERNAME} -p ${STAGE_REDHAT_IO_TOKEN}
 tee Containerfile > /dev/null << EOF
@@ -189,7 +193,7 @@ RUN dnf install -y \
 RUN rm -f /tmp/greenboot-*.rpm
 EOF
 podman build  --retry=5 --retry-delay=10s -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
-greenprint "Pushing greenboot-bootc container to quay.io"
+greenprint "Pushing bootc container to quay.io"
 podman push quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 
 ###########################################################
@@ -237,7 +241,7 @@ podman run \
 ## Provision vm with qcow2/iso artifacts
 ##
 ###########################################################
-greenprint "Installing vm with bootc qcow2 image"
+greenprint "Installing vm with bootc qcow2/iso image"
 mv $(pwd)/output/qcow2/disk.qcow2 /var/lib/libvirt/images/${TEST_UUID}-disk.qcow2
 LIBVIRT_IMAGE_PATH_UEFI=/var/lib/libvirt/images/${TEST_UUID}-disk.qcow2
 sudo restorecon -Rv /var/lib/libvirt/images/
@@ -248,7 +252,7 @@ sudo virt-install  --name="${TEST_UUID}-uefi"\
                    --network network=integration,mac=34:49:22:B0:83:30 \
                    --os-type linux \
                    --os-variant ${OS_VARIANT} \
-                   --boot uefi \
+                   --boot ${BOOT_ARGS} \
                    --nographics \
                    --noautoconsole \
                    --wait=-1 \
