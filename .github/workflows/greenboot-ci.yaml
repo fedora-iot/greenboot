@@ -57,7 +57,7 @@ jobs:
           tmt_context: "arch=x86_64;distro=fedora-41"
           tmt_plan_regex: bootc
           tf_scope: private
-          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
           variables: "ARCH=x86_64"
           timeout: 90
 
@@ -99,7 +99,7 @@ jobs:
           tmt_context: "arch=x86_64;distro=cs-9"
           tmt_plan_regex: bootc
           tf_scope: private
-          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
           variables: "ARCH=x86_64"
           timeout: 90
 
@@ -120,6 +120,6 @@ jobs:
           tmt_context: "arch=x86_64;distro=rhel-9-6"
           tmt_plan_regex: bootc
           tf_scope: private
-          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
           variables: "ARCH=x86_64"
           timeout: 90
