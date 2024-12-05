@@ -55,6 +55,7 @@ case "${ID}-${VERSION_ID}" in
         BASE_IMAGE_URL="registry.stage.redhat.io/rhel9/rhel-bootc:9.6"
         BIB_URL="registry.stage.redhat.io/rhel9/bootc-image-builder:9.6"
         BOOT_ARGS="uefi"
+        sed -i "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/rhel-9-6.repo
         ;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
@@ -192,6 +193,13 @@ RUN dnf install -y \
 # Clean up by removing the local RPMs if desired
 RUN rm -f /tmp/greenboot-*.rpm
 EOF
+
+if [[ "$ID" == "rhel" ]]; then
+    tee -a Containerfile >> /dev/null << EOF
+COPY files/rhel-9-6.repo /etc/yum.repos.d/rhel-9-6.repo
+EOF
+fi
+
 podman build  --retry=5 --retry-delay=10s -t quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID} -f Containerfile .
 greenprint "Pushing greenboot-bootc container to quay.io"
 podman push quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
