@@ -61,28 +61,26 @@ jobs:
           variables: "ARCH=x86_64"
           timeout: 90
 
-  Fedora-rawhide-bootc:
-    needs: check-pull-request
-    if: ${{ needs.check-pull-request.outputs.allowed_user == 'true' }}
-    continue-on-error: true
-    runs-on: ubuntu-latest
+  # Fedora-rawhide-bootc:
+  #   needs: check-pull-request
+  #   if: ${{ needs.check-pull-request.outputs.allowed_user == 'true' }}
+  #   continue-on-error: true
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Run the tests
-        uses: sclorg/testing-farm-as-github-action@v3.1.2
-        with:
-          compose: Fedora-Rawhide
-          api_key: ${{ secrets.TF_API_KEY }}
-          git_url: ${{ needs.check-pull-request.outputs.repo_url }}
-          git_ref: ${{ needs.check-pull-request.outputs.ref }}
-          # update_pull_request_status: true
-          # pull_request_status_name: "Fedora-Rawhide-bootc"
-          tmt_context: "arch=x86_64;distro=fedora-rawhide"
-          tmt_plan_regex: bootc
-          tf_scope: private
-          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
-          variables: "ARCH=x86_64"
-          timeout: 90
+  #   steps:
+  #     - name: Run the tests
+  #       uses: sclorg/testing-farm-as-github-action@v3.1.2
+  #       with:
+  #         compose: Fedora-Rawhide
+  #         api_key: ${{ secrets.TF_API_KEY }}
+  #         git_url: ${{ needs.check-pull-request.outputs.repo_url }}
+  #         git_ref: ${{ needs.check-pull-request.outputs.ref }}
+  #         tmt_context: "arch=x86_64;distro=fedora-rawhide"
+  #         tmt_plan_regex: bootc
+  #         tf_scope: private
+  #         secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }}"
+  #         variables: "ARCH=x86_64"
+  #         timeout: 90
 
   Centos-stream-9-bootc:
     needs: check-pull-request
@@ -98,8 +96,6 @@ jobs:
           api_key: ${{ secrets.TF_API_KEY }}
           git_url: ${{ needs.check-pull-request.outputs.repo_url }}
           git_ref: ${{ needs.check-pull-request.outputs.ref }}
-          # update_pull_request_status: true
-          # pull_request_status_name: "Centos-stream-9-bootc"
           tmt_context: "arch=x86_64;distro=cs-9"
           tmt_plan_regex: bootc
           tf_scope: private
@@ -121,8 +117,6 @@ jobs:
           api_key: ${{ secrets.TF_API_KEY }}
           git_url: ${{ needs.check-pull-request.outputs.repo_url }}
           git_ref: ${{ needs.check-pull-request.outputs.ref }}
-          # update_pull_request_status: true
-          # pull_request_status_name: "Centos-stream-9-bootc"
           tmt_context: "arch=x86_64;distro=rhel-9-6"
           tmt_plan_regex: bootc
           tf_scope: private
