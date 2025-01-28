@@ -13,12 +13,16 @@ function setup() {
     [ "$status" -ne 0 ]
 }
 
-@test "Test greenboot runs all required scripts even if one fails" {
+@test "Test greenboot exits when one required script fails" {
     run $GREENBOOT_BIN_PATH check
-    [[ "$output" == *"10_failing_check"* ]]
-    [[ "$output" == *"20_failing_check"* ]]
-    [[ "$output" == *"30_failing_check"* ]]
-    [[ "$output" == *"40_failing_check"* ]]
+    [ "$status" -ne 0 ]  # Ensure greenboot exits with a non-zero status
+
+    # Count occurrences of failing scripts in the output
+    fail_count=$(echo "$output" | grep -E "FAILURE" | \
+    grep -c -E "10_failing_check.sh|20_failing_check.sh|30_failing_check.sh|40_failing_check.sh")
+
+    # Ensure only one failing script is reported
+    [ "$fail_count" -eq 1 ]
 }
 
 function teardown() {
