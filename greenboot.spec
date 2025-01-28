@@ -13,7 +13,7 @@ License:            LGPL-2.1-or-later
 URL:                https://github.com/%{repo_owner}/%{repo_name}
 Source0:            https://github.com/%{repo_owner}/%{repo_name}/archive/%{repo_tag}.tar.gz
 
-ExcludeArch: s390x
+ExcludeArch: s390x {%ix86}
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
