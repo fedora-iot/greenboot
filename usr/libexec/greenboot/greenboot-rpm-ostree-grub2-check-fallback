@@ -8,10 +8,12 @@ function attempt_rollback {
   if command -v bootc &> /dev/null; then
       status_type=$(bootc status --booted --json 2>/dev/null | jq -r .status.type 2>/dev/null)
       if [ "$status_type" == "bootcHost" ]; then
+	  echo "<3> On a bootc managed host, attempting rollback with bootc."
           bootc rollback
           echo "<3>FALLBACK BOOT DETECTED! Default bootc deployment has been rolled back."
+          return
       fi
-      return
+      echo "<3> Not on a bootc managed host, trying rpm-ostree rollback next."
   fi
   # Check if its ostree based os
   if [ -f /run/ostree-booted ]; then
