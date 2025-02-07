@@ -6,7 +6,6 @@ LC_ALL=C
 SCRIPTS_CHECK_PATHS=("/usr/lib/greenboot/check" "/etc/greenboot/check")
 SCRIPTS_GREEN_PATHS=("/usr/lib/greenboot/green.d" "/etc/greenboot/green.d")
 SCRIPTS_RED_PATHS=("/usr/lib/greenboot/red.d" "/etc/greenboot/red.d")
-declare -A DIS_CHECK_STATUS=()
 
 source_configuration_file() {
     greenboot_configuration_file=/etc/greenboot/greenboot.conf
@@ -17,34 +16,15 @@ source_configuration_file() {
 }
 
 source_configuration_file
-function init_disabled_map {
-    for disabled_healthcheck in "${DISABLED_HEALTHCHECKS[@]}"; do
-	DIS_CHECK_STATUS["$disabled_healthcheck"]=1;
-    done
-}
-
-source_configuration_file
-function print_unexecuted_checks {
-    for disabled_healthcheck in "${DISABLED_HEALTHCHECKS[@]}"; do
-	if [[  "${DIS_CHECK_STATUS[$disabled_healthcheck]}" == 1 ]]; then
-           echo "WARNING: $disabled_healthcheck wasn't executed because it's disabled"
-	fi
-    done
-}
-
-source_configuration_file
 function is_disabled {
     healthcheck=$1
     for disabled_healthcheck in "${DISABLED_HEALTHCHECKS[@]}"; do
-        if [ "${healthcheck}" == "${disabled_healthcheck}" ]; then
-	    DIS_CHECK_STATUS["${disabled_healthcheck}"]=0
+      if [ "${healthcheck}" == "${disabled_healthcheck}" ]; then
 	    return 0
 	fi
     done
     return 1
 }
-
-init_disabled_map
 
 script_runner () {
   local scripts_dir=$1; shift
@@ -53,14 +33,16 @@ script_runner () {
   local required_hc_failed=false
   echo "$start_msg"
   for script in $(find "$scripts_dir" -name '*.sh' | sort); do
-    if is_disabled "$(basename "$script")"; then
-      echo "'$(basename "$script")' was skipped, as specified in config"
+    if [[ "$required_hc_failed" == true && "$mode" == "strict" ]]; then
+      echo "<5>'$(basename "$script")' was skipped due to a previous failure"
+    elif is_disabled "$(basename "$script")"; then
+      echo "<5>'$(basename "$script")' was skipped, as specified in config"
     else
-      local rc=0
-      systemd-cat -t "$(basename "$script")" bash "$script" || rc=$?
-      if [ $rc -ne 0 ]; then
+      local return_code=0
+      systemd-cat -t "$(basename "$script")" bash "$script" || return_code=$?
+      if [ $return_code -ne 0 ]; then
         local failure_msg
-        failure_msg="Script '$(basename "$script")' FAILURE (exit code '$rc')"
+        failure_msg="Script '$(basename "$script")' FAILURE (exit code '$return_code')"
         case "$mode" in
           "relaxed")
             echo "<2>$failure_msg. Continuing..." >&2
@@ -80,13 +62,15 @@ script_runner () {
 
 case "$1" in
   "check")
-    rc=0
+    return_code=0
     for health_check_path in "${SCRIPTS_CHECK_PATHS[@]}"; do
-      script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || rc=1
+      script_runner "$health_check_path/required.d" "strict" "Running Required Health Check Scripts..." || {
+        return_code=1
+        break
+      }
       script_runner "$health_check_path/wanted.d" "relaxed" "Running Wanted Health Check Scripts..."
     done
-    print_unexecuted_checks
-    exit $rc
+    exit $return_code
     ;;
   "green")
     echo "<5>Boot Status is GREEN - Health Check SUCCESS"
