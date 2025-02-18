@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.15.7
+Version:            0.15.8
 Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
@@ -176,6 +176,11 @@ fi
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Tue Feb 18 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-1
+- Bump to 0.15.8
+- Fail early if a required check fails
+- Fix rollback if bootc is installed
+
 * Thu Oct 31 2024 Sayan Paul <paul.sayan@gmail.com> - 0.15.7-1
 - Update to 0.15.7
 - Reword warning message for disabled checks
