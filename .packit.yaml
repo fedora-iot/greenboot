@@ -9,30 +9,59 @@ upstream_tag_template: v{version}
 copy_upstream_release_description: true
 downstream_package_name: greenboot
 
+packages:
+  greenboot-fedora:
+    downstream_package_name: greenboot
+    upstream_package_name: greenboot
+  greenboot-centos:
+    downstream_package_name: greenboot
+    upstream_package_name: greenboot
+    pkg_tool: centpkg
+
 jobs:
-  - job: copr_build
+
+  # Fedora jobs
+
+  - &greenboot_copr_build_fedora
+    job: copr_build
+    packages: [greenboot-fedora]
     trigger: pull_request
-    targets:
-      - fedora-development
-      - fedora-latest-stable
+    targets: ["fedora-latest-stable", "fedora-latest", "fedora-rawhide"]
+
+  - <<: *greenboot_copr_build_fedora
+    trigger: commit
+    branch: main
+    owner: "@fedora-iot"
+    project: fedora-iot
 
   - job: sync_from_downstream
     trigger: commit
 
   - job: propose_downstream
     trigger: release
-    dist_git_branches:
-      - fedora-development
-      - fedora-latest-stable
+    packages: [greenboot-fedora]
+    dist_git_branches: ["fedora-development", "fedora-latest-stable"]
 
   - job: koji_build
     trigger: commit
-    dist_git_branches:
-      - fedora-development
-      - fedora-latest-stable
+    allowed_pr_authors: [all_committers]
+    dist_git_branches: ["fedora-development", "fedora-latest-stable"]
 
   - job: bodhi_update
     trigger: commit
-    dist_git_branches:
-      - fedora-development
-      - fedora-latest-stable
+    allowed_builders: [all_committers]
+    dist_git_branches: ["fedora-development", "fedora-latest-stable"]
+
+  # CentOS jobs
+
+  - &greenboot_copr_build_centos
+    job: copr_build
+    packages: [greenboot-centos]
+    trigger: pull_request
+    targets: ["centos-stream-9", "centos-stream-10"]
+
+  - <<: *greenboot_copr_build_centos
+    trigger: commit
+    branch: main
+    owner: "@fedora-iot"
+    project: fedora-iot
