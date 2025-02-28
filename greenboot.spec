@@ -2,7 +2,7 @@
 
 Name:               greenboot
 Version:            0.15.8
-Release:            1%{?dist}
+Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
 
@@ -13,7 +13,11 @@ License:            LGPL-2.1-or-later
 URL:                https://github.com/%{repo_owner}/%{repo_name}
 Source0:            https://github.com/%{repo_owner}/%{repo_name}/archive/%{repo_tag}.tar.gz
 
-ExcludeArch: s390x {%ix86}
+%if 0%{?fedora} || 0%{?rhel} >= 10
+ExcludeArch: s390x %{ix86}
+%else
+ExcludeArch: s390x
+%endif
 BuildRequires:      systemd-rpm-macros
 %{?systemd_requires}
 Requires:           systemd >= 240
@@ -176,6 +180,9 @@ fi
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Thu Feb 27 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-2
+- Keep building ix86 in rhel < 10
+
 * Tue Feb 18 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-1
 - Bump to 0.15.8
 - Fail early if a required check fails
