@@ -2,7 +2,7 @@
 
 Name:               greenboot
 Version:            0.15.8
-Release:            2%{?dist}
+Release:            3%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
 
@@ -54,7 +54,7 @@ Obsoletes:          greenboot-update-platforms-check <= 0.12.0
 %{summary}.
 
 %prep
-%setup -q
+%autosetup
 
 %build
 
@@ -180,6 +180,9 @@ fi
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Fri Feb 28 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-3
+- use autosetup instead of setup
+
 * Thu Feb 27 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-2
 - Keep building ix86 in rhel < 10
 
