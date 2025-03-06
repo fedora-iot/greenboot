@@ -50,10 +50,22 @@ case "${ID}-${VERSION_ID}" in
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
         BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
         ;;
+    "centos-10")
+        OS_VARIANT="centos-stream9"
+        BASE_IMAGE_URL="quay.io/centos-bootc/centos-bootc:stream10"
+        BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
+        ;;
     "rhel-9.6")
         OS_VARIANT="rhel9-unknown"
         BASE_IMAGE_URL="registry.stage.redhat.io/rhel9/rhel-bootc:9.6"
         BIB_URL="registry.stage.redhat.io/rhel9/bootc-image-builder:9.6"
+        BOOT_ARGS="uefi"
+        ;;
+    "rhel-10.0")
+        OS_VARIANT="rhel10-unknown"
+        BASE_IMAGE_URL="registry.stage.redhat.io/rhel10/rhel-bootc:10.0"
+        BIB_URL="registry.stage.redhat.io/rhel10/bootc-image-builder:10.0"
         BOOT_ARGS="uefi"
         ;;
     *)

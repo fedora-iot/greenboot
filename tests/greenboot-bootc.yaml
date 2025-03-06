@@ -57,7 +57,9 @@
         - name: failed count + 1
           set_fact:
             failed_counter: "{{ failed_counter | int + 1 }}"
-      when: ansible_facts['distribution'] == 'Fedora'
+      when: (ansible_facts['distribution'] == 'Fedora') or
+            (ansible_facts['distribution'] == 'CentOS' and ansible_facts ['distribution_version'] is version('10', '==')) or
+            (ansible_facts['distribution'] == 'RedHat' and ansible_facts ['distribution_version'] is version('10.0', '=='))
 
     # case: check greenboot* services
     - name: a list of greenboot* service should be enabled
@@ -78,7 +80,8 @@
         - name: failed count + 1
           set_fact:
             failed_counter: "{{ failed_counter | int + 1 }}"
-      when: ansible_facts['distribution'] != 'Fedora'
+      when: (ansible_facts['distribution'] == 'CentOS' and ansible_facts ['distribution_version'] is version('9', '==')) or
+            (ansible_facts['distribution'] == 'RedHat' and ansible_facts ['distribution_version'] is version('9.6', '=='))
 
     # case: check greenboot fall back log
     - name: fallback log should be found here

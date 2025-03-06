@@ -50,12 +50,26 @@ case "${ID}-${VERSION_ID}" in
         BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
         BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
         ;;
+    "centos-10")
+        OS_VARIANT="centos-stream9"
+        BASE_IMAGE_URL="quay.io/centos-bootc/centos-bootc:stream10"
+        #BIB_URL="quay.io/centos-bootc/bootc-image-builder:latest"
+        BIB_URL="quay.io/redhat-user-workloads/centos-bootc-tenant/bootc-image-builder/bootc-image-builder@sha256:58885c4bec997686868bc238eb5007b137f1b32d2995bfb689dc74ca329d0cd9"
+        BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
+        ;;
     "rhel-9.6")
         OS_VARIANT="rhel9-unknown"
         BASE_IMAGE_URL="registry.stage.redhat.io/rhel9/rhel-bootc:9.6"
         BIB_URL="registry.stage.redhat.io/rhel9/bootc-image-builder:9.6"
         BOOT_ARGS="uefi"
         sed -i "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/rhel-9-6.repo
+        ;;
+    "rhel-10.0")
+        OS_VARIANT="rhel10-unknown"
+        BASE_IMAGE_URL="registry.stage.redhat.io/rhel10/rhel-bootc:10.0"
+        BIB_URL="registry.stage.redhat.io/rhel10/bootc-image-builder:10.0"
+        BOOT_ARGS="uefi"
+        sed -i "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/rhel-10-0.repo
         ;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
@@ -194,9 +208,15 @@ RUN dnf install -y \
 RUN rm -f /tmp/greenboot-*.rpm
 EOF
 
-if [[ "$ID" == "rhel" ]]; then
+if [[ "${ID}-${VERSION_ID}" == "rhel-9.6" ]]; then
     tee -a Containerfile >> /dev/null << EOF
 COPY files/rhel-9-6.repo /etc/yum.repos.d/rhel-9-6.repo
+EOF
+fi
+
+if [[ "${ID}-${VERSION_ID}" == "rhel-10.0" ]]; then
+    tee -a Containerfile >> /dev/null << EOF
+COPY files/rhel-10-0.repo /etc/yum.repos.d/rhel-10-0.repo
 EOF
 fi
 
