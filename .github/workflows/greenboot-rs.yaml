@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "User '${{ github.event.sender.login }}' has permission '${{ fromJson(steps.user_permission.outputs.data).permission }}' allowed values: 'admin', 'write'"
           echo "allowed_user=true" >> $GITHUB_OUTPUT
-          
+
       - name: Get information for pull request
         uses: octokit/request-action@v2.x
         id: pr-api
@@ -45,7 +45,8 @@ jobs:
 
   comment-info:
     needs: pr-info
-    if: ${{ needs.pr-info.outputs.allowed_user == 'true' }}
+    if: ${{ needs.pr-info.outputs.allowed_user == 'true' &&
+            needs.pr-info.outputs.base_ref == 'greenboot-rs' }}
     runs-on: ubuntu-latest
     steps:
       - name: PR comment analysis
@@ -130,6 +131,7 @@ jobs:
           route: 'POST /repos/${{ github.repository }}/statuses/${{ needs.pr-info.outputs.sha }}'
           context: ${{ env.STATUS_NAME }}
           state: pending
+          description: 'Running test'
           target_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -211,15 +213,9 @@ jobs:
           sudo dnf info osbuild osbuild-composer
         working-directory: ./osbuild-composer
 
-      - name: Checkout greenboot ci test code
-        uses: actions/checkout@v3
-        with:
-          repository: yih-redhat/greenboot-ci
-          path: greenboot-ci
-
       - name: Run greenboot-rs.sh test
         run: ./greenboot-rs.sh
-        working-directory: ./greenboot-ci/tests
+        working-directory: ./tests
         timeout-minutes: 100
 
       - name: Set result status
@@ -232,3 +228,11 @@ jobs:
           target_url: 'https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: greenboot-rs-39
+          path: |
+            ./tests/*.json
+            ./tests/*.log
