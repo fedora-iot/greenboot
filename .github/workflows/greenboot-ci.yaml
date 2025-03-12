@@ -59,12 +59,7 @@ jobs:
           tf_scope: private
           variables: "ARCH=x86_64"
           timeout: 90
-          secrets: |
-            QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};
-            QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};
-            STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};
-            STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};
-            DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }};
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
 
   # Fedora-rawhide-bootc:
   #   needs: check-pull-request
@@ -106,12 +101,7 @@ jobs:
           tf_scope: private
           variables: "ARCH=x86_64"
           timeout: 90
-          secrets: |
-            QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};
-            QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};
-            STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};
-            STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};
-            DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }};
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
 
   Centos-stream-10-bootc:
     needs: check-pull-request
@@ -132,12 +122,7 @@ jobs:
           tf_scope: private
           variables: "ARCH=x86_64"
           timeout: 90
-          secrets: |
-            QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};
-            QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};
-            STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};
-            STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};
-            DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }};
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
 
   RHEL-96-bootc:
     needs: check-pull-request
@@ -158,12 +143,7 @@ jobs:
           tf_scope: private
           variables: "ARCH=x86_64"
           timeout: 90
-          secrets: |
-            QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};
-            QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};
-            STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};
-            STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};
-            DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }};
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
 
   RHEL-10-bootc:
     needs: check-pull-request
@@ -184,9 +164,4 @@ jobs:
           tf_scope: private
           variables: "ARCH=x86_64"
           timeout: 90
-          secrets: |
-            QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};
-            QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};
-            STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};
-            STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};
-            DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }};
+          secrets: "QUAY_USERNAME=${{ secrets.QUAY_USERNAME }};QUAY_PASSWORD=${{ secrets.QUAY_PASSWORD }};STAGE_REDHAT_IO_USERNAME=${{ secrets.STAGE_REDHAT_IO_USERNAME }};STAGE_REDHAT_IO_TOKEN=${{ secrets.STAGE_REDHAT_IO_TOKEN }};DOWNLOAD_NODE=${{ secrets.DOWNLOAD_NODE }}"
