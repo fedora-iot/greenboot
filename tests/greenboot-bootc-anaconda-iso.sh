@@ -262,6 +262,7 @@ podman run \
     --type anaconda-iso \
     --config /config.json \
     --rootfs xfs \
+    --use-librepo=true \
     quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 
 ###########################################################

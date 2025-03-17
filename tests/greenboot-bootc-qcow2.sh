@@ -246,6 +246,7 @@ podman run \
     --type qcow2 \
     --config /config.json \
     --rootfs xfs \
+    --use-librepo=true \
     quay.io/${QUAY_USERNAME}/greenboot-bootc:${TEST_UUID}
 
 ###########################################################
