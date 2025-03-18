@@ -69,7 +69,7 @@ mkdir -p %{buildroot}%{_prefix}/lib/%{name}/check/required.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/check/wanted.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/green.d
 mkdir    %{buildroot}%{_prefix}/lib/%{name}/red.d
-install -D -t %{buildroot}%{_prefix}/lib/bootupd/grub2-static/configs.d grub2/greenboot.cfg
+install -D -t %{buildroot}%{_prefix}/lib/bootupd/grub2-static/configs.d grub2/08_greenboot.cfg
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_unitdir}/greenboot-healthcheck.service.d
 mkdir -p %{buildroot}%{_tmpfilesdir}
