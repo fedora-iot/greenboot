@@ -340,7 +340,7 @@ ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
 # Test greenboot functionality
-ansible-playbook -v -i /${TEMPDIR}/inventory greenboot-bootc.yaml || RESULTS=0
+ansible-playbook -v -i ${TEMPDIR}/inventory greenboot-bootc.yaml || RESULTS=0
 
 # Test result checking
 check_result
