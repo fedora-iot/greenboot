@@ -8,6 +8,8 @@ function run_tests() {
 		./greenboot-bootc-qcow2.sh
 	elif [ "$TEST_CASE" = "bootc-anaconda-iso" ]; then
 		./greenboot-bootc-anaconda-iso.sh
+	elif [ "$TEST_CASE" = "rpm-ostree-commit" ]; then
+		./greenboot-rpm-ostree.sh
 	else
 		echo "Error: Test case $TEST_CASE not found!"
 		exit 1
