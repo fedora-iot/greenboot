@@ -85,17 +85,13 @@ case "${ID}-${VERSION_ID}" in
         OSTREE_REF="rhel/9/${ARCH}/edge"
         OS_VARIANT="rhel9-unknown"
         BOOT_LOCATION="http://${DOWNLOAD_NODE}/rhel-9/nightly/RHEL-9/latest-RHEL-9.6.0/compose/BaseOS/x86_64/os/"
-        sed -i "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/rhel-9-6-0.json
-        sudo cp files/rhel-9-6-0.json /etc/osbuild-composer/repositories/rhel-9-6-0.json
-        ;;
+        sed "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/rhel-9-6-0.json | sudo tee /etc/osbuild-composer/repositories/rhel-96.json > /dev/null;;
     "centos-9")
         OSTREE_REF="centos/9/${ARCH}/edge"
         OS_VARIANT="centos-stream9"
         BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
         BOOT_LOCATION="https://composes.stream.centos.org/production/latest-CentOS-Stream/compose/BaseOS/x86_64/os/"
-        sed -i "s/REPLACE_ME_HERE/${DOWNLOAD_NODE}/g" files/centos-stream-9.json
-        sudo cp files/centos-stream-9.json /etc/osbuild-composer/repositories/centos-stream-9.json
-        ;;
+        sudo cp files/centos-stream-9.json /etc/osbuild-composer/repositories/centos-9.json;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
         exit 1;;
