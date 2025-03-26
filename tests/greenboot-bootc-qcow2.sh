@@ -200,7 +200,8 @@ RUN dnf install -y \
     systemctl enable greenboot-grub2-set-counter \
     greenboot-grub2-set-success.service greenboot-healthcheck.service \
     greenboot-loading-message.service greenboot-rpm-ostree-grub2-check-fallback.service \
-    redboot-auto-reboot.service redboot-task-runner.service redboot.target
+    redboot-auto-reboot.service redboot-task-runner.service redboot.target \
+    greenboot-status.service  greenboot-task-runner.service \
 # Clean up by removing the local RPMs if desired
 RUN rm -f /tmp/greenboot-*.rpm
 EOF
