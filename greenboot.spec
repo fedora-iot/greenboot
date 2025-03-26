@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
 Name:               greenboot
-Version:            0.15.8
-Release:            3%{?dist}
+Version:            0.15.9
+Release:            1%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
 
@@ -174,6 +174,10 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Tue Mar 25 2025 Sayan Paul <paul.sayan@gmail.com> - - 0.15.9-1
+- Bump to 0.15.9
+- Bootupd grub2 static ordering
+
 * Fri Feb 28 2025 Antonio Murdaca <antoniomurdaca@gmail.com> - 0.15.8-3
 - use autosetup instead of setup
 
