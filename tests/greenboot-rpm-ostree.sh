@@ -90,12 +90,16 @@ case "${ID}-${VERSION_ID}" in
         OSTREE_REF="centos/9/${ARCH}/edge"
         OS_VARIANT="centos-stream9"
         BOOT_ARGS="uefi,firmware.feature0.name=secure-boot,firmware.feature0.enabled=no"
-        BOOT_LOCATION="https://composes.stream.centos.org/production/latest-CentOS-Stream/compose/BaseOS/x86_64/os/"
         sudo cp files/centos-stream-9.json /etc/osbuild-composer/repositories/centos-9.json;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
         exit 1;;
 esac
+
+if [[ "${ID}-${VERSION_ID}" == "centos-9" ]]; then
+    CURRENT_COMPOSE_CS9=$(curl -s "https://composes.stream.centos.org/production/" | grep -ioE ">CentOS-Stream-9-.*/<" | tr -d '>/<' | tail -1)
+    BOOT_LOCATION="https://composes.stream.centos.org/production/${CURRENT_COMPOSE_CS9}/compose/BaseOS/x86_64/os/"
+fi
 
 # Build greenboot RPMs
 greenprint "Building greenboot packages"
