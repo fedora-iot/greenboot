@@ -8,7 +8,7 @@ boot_was_ro=false
 # Remount /boot as read-only if it was mounted as read-only ealier
 function remount_boot_ro {
     if $boot_was_ro; then
-        mount -o remount,ro /boot || exit 13
+        mount -o remount,bind,ro /boot || exit 13
     fi
     return
 }
