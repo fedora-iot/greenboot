@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+# Determine if the current boot is a fallback boot, if not exit early
+if ! (grub2-editenv list | grep -q "^boot_counter=-1$"); then
+  exit 0
+fi
+
 source /usr/libexec/greenboot/greenboot-boot-remount
 
 function attempt_rollback {
@@ -25,25 +30,13 @@ function attempt_rollback {
   return
 }
 
-# Determine if the current boot is a fallback boot
 # If booted into fallback deployment, clean up bootloader entries (rollback)
-if grub2-editenv list | grep -q "^boot_counter=-1$"; then
-  # Logs from previous boot may be unavailable on systems without internal RTC; defaulting to empty string
-  prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)" || true
-  attempt_rollback
-  if [ -n "$prev_logs" ]; then
-    echo "<3>Health check logs from previous boot:"
-    echo "<3>$prev_logs"
-  fi
-
-remount_boot_rw
-
-  if ! /usr/bin/grub2-editenv - unset boot_counter; then
-    # If the above command fails, remount /boot as read-only and exit with failure
-    remount_boot_ro
-    exit 1
-  fi
+# Logs from previous boot may be unavailable on systems without internal RTC; defaulting to empty string
+prev_logs="$(journalctl -u greenboot-healthcheck.service -p 2 -b -1 -o cat)" || true
+attempt_rollback
+if [ -n "$prev_logs" ]; then
+  echo "<3>Health check logs from previous boot:"
+  echo "<3>$prev_logs"
 fi
 
-# Remount /boot as read-only if it was mounted as read-write
-remount_boot_ro
+/usr/bin/grub2-editenv - unset boot_counter
