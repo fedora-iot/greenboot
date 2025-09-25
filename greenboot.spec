@@ -2,7 +2,7 @@
 
 Name:               greenboot
 Version:            0.15.9
-Release:            1%{?dist}
+Release:            2%{?dist}
 Summary:            Generic Health Check Framework for systemd
 License:            LGPL-2.1-or-later
 
@@ -174,6 +174,9 @@ install -DpZm 0644 etc/greenboot/greenboot.conf %{buildroot}%{_sysconfdir}/%{nam
 %{_prefix}/lib/%{name}/check/required.d/02_watchdog.sh
 
 %changelog
+* Mon Sep 15 2025 Sayan Paul <paul.sayan@gmail.com> - - 0.15.9-2
+- Do not remount /boot superblock/filesystem readonly
+
 * Tue Mar 25 2025 Sayan Paul <paul.sayan@gmail.com> - - 0.15.9-1
 - Bump to 0.15.9
 - Bootupd grub2 static ordering
