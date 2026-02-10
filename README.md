@@ -1,3 +1,21 @@
+# ⚠️ Deprecation Notice
+
+This Shell-based version of **greenboot** is now **deprecated** in favor of **[greenboot-rs](https://github.com/fedora-iot/greenboot-rs)**.
+
+As part of our effort to provide a more robust, performant, and type-safe experience, we have rewritten the core logic in **Rust**. Future development will happen exclusively in the new repository.
+
+> **Note:** The rpm package name remains `greenboot`. Versions **0.16.0 and above** are built from the `greenboot-rs` source code.
+
+### What this means for you:
+* **Maintenance:** This repository is now in maintenance mode. No new features will be added here.
+* **Critical Fixes:** Security patches or critical bug fixes may be considered on a case-by-case basis, but are not guaranteed.
+* **Availability:** This code remains open and available for archival purposes and for those who still require the legacy Shell implementation.
+
+### Recommended Actions:
+* **Migrate to greenboot-rs:** We highly recommend switching to the Rust implementation for better resource efficiency and improved error handling.
+* **Check Compatibility:** While we aim for feature parity, please review the documentation in the new repository for any minor configuration changes.
+* **Forking:** If you have specific needs tied to the Shell version, feel free to fork this repository and maintain a private version.
+
 # greenboot
 Generic Health Check Framework for systemd on [rpm-ostree](https://coreos.github.io/rpm-ostree/) based systems.
 
