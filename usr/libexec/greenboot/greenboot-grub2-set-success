@@ -1,25 +1,9 @@
 #!/bin/bash
-
 set -eo pipefail
 
 source /usr/libexec/greenboot/greenboot-boot-remount
-remount_boot_rw
 
 # Run the grub2-editenv commands
-if ! /usr/bin/grub2-editenv /boot/grub2/grubenv set boot_success=1; then
-    # If the first command fails, remount /boot as read-only and exit with failure
-    remount_boot_ro
-    exit 1
-fi
+/usr/bin/grub2-editenv /boot/grub2/grubenv set boot_success=1
 
-if ! /usr/bin/grub2-editenv /boot/grub2/grubenv unset boot_counter; then
-    # If the second command fails, remount /boot as read-only and exit with failure
-    remount_boot_ro
-    exit 1
-fi
-
-# Remount /boot as read-only if it was mounted as read-write
-remount_boot_ro
-
-# If everything succeeded, exit with success
-exit 0
+/usr/bin/grub2-editenv /boot/grub2/grubenv unset boot_counter
